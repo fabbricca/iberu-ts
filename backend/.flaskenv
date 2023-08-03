@@ -1,0 +1,2 @@
+FLASK_APP=iberu.py
+FLASK_DEBUG=1

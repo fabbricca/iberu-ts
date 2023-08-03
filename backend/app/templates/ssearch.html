@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <title>Unlock Trading Strategies That Work | Iberu-TS</title>
+    <meta name="description" content="Become part of the Iberu-TS community and find the best strategy for you to automate your trading.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
+    <link rel="stylesheet" href="/static/css/css.css">
+    <script async src="https://kit.fontawesome.com/b11c5c9d0c.js" crossorigin="anonymous"></script>
+    <script type="module" defer src="/static/js/base.js"></script>
+  </head>
+  <body>
+    <nav>      
+      <div class="logo">
+        <a href="{{ url_for('main.index') }}">
+          <img src="/static/img/logo.png" alt="Iberu Trading Strategies logo">
+        </a>
+      </div>
+
+      <div class="navbar">
+        <button class="navbar-cancel" aria-label="Close navbar">
+          <i class="fas fa-times fa-xl"></i>
+        </button>
+        <ul class="navbar-items">
+          {% if context.current == 1 %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}" class="current"><i class="fa-solid fa-chart-simple"></i> Strategies</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-chart-simple"></i> Strategies</a>
+            </li>
+          {% endif %}
+          {% if context.current == 2 %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-at"></i> Backtest</a>
+            </li>
+          {% endif %}
+          {% if context.current == 3 %}
+            <li>
+              <a href="{{ url_for('main.index') }}"  class="current"><i class="fa-solid fa-users"></i> Creators</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-users"></i> Creators</a>
+            </li>
+          {% endif %}
+          {% if context.current == 3 %}
+            <li>
+              <a href="{{ url_for('main.index') }}"  class="current"><i class="fa-solid fa-circle-info"></i> About</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-circle-info"></i> About</a>
+            </li>
+          {% endif %}
+        </ul>
+
+        {% if not current_user.is_authenticated %}
+          <div class="navbar-auth">
+            <a href="{{ url_for('auth.login') }}" class="iberu-button medium inverse" id="login">Log In</a>
+            <a href="{{ url_for('auth.register') }}" class="iberu-button medium" id="register">Register</a>
+          </div>
+        {% endif %}
+
+        <div class="navbar-theme">
+          <div>
+            <i class="fa-solid fa-circle-half-stroke"></i>
+            <span>Theme</span>
+          </div>
+          <input type="checkbox" id="theme-toggle" name="toggle" aria-label="theme toggle">
+          <label for="theme-toggle" tabindex="0">
+            <span class="visually-hidden">theme toggle</span>
+            <i id="moon" class="fa-solid fa-moon"></i>
+            <i id="sun" class="fa-solid fa-sun"></i>
+          </label>
+        </div>
+      </div>
+
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.user') }}" class="navbar-user"><img id="user-image" src="{{ url_for('main.retrieve_avatar') }}"></a>
+      {% else %}
+        <a href="/" class="navbar-creator iberu-button medium"><i class="fa-solid fa-gift"></i> Creator</a>
+      {% endif %} 
+
+      <button class="navbar-menu" aria-label="Open navbar">
+        <i class="fa-solid fa-bars fa-xl"></i>
+      </button>
+    </nav>
+
+    <header id="ssearch-top-container" class="row panel">
+      <div id="ssearch-top" class="external-container large">
+        <h1>Top performing strategies</h1>
+        <p class="secondary-info">Strategies with the highest return last month</p>
+        <div class="hlist" id="ssearch-thumbnails">
+          <button class="fa-solid fa-chevron-left" aria-label="left arrow"></button>
+          <button class="fa-solid fa-chevron-right" aria-label="right arrow"></button>
+          {% for e in context.top_performer %}
+            {% if e==context.top_performer[0] %}
+            <div class="thumbnail current">
+              <div class="header">
+                <div class="hlist">
+                  <img src="{{ e.asset[0] }}" class="icon">
+                </div>
+                <a href="{{ url_for('main.ssearch')}}/{{ e.name.replace(' ', '%20') }}">{{ e.name }}</a>
+              </div>
+              <div class="body">
+                {% if e.performance >= 0 %}
+                  <div class="column wrapper positive">
+                    <span>+{{ '%0.1f'| format(e.performance|float) }}%<i class="fa-solid fa-arrow-up"></i></span>
+                  </div>
+                {% else %}
+                  <div class="column wrapper negative">
+                    <span>{{ '%0.1f'| format(e.performance|float) }}%<i class="fa-solid fa-arrow-down"></i></span>
+                  </div>
+                {% endif %}
+                <div class="column wrapper svg">
+                  <img src="/static/img/month_performance/{{ e.id }}.svg" class="chart-icon" alt="{{e.name}} strategy icon">
+                </div>
+              </div>
+            </div>
+            {% else %}
+            <div class="thumbnail">
+              <div class="header">
+                <div class="hlist">
+                  <img src="{{ e.asset[0] }}" class="icon">
+                </div>
+                <a href="{{ url_for('main.ssearch')}}/{{ e.name.replace(' ', '%20') }}">{{ e.name }}</a>
+              </div>
+              <div class="body">
+                {% if e.performance >= 0 %}
+                  <div class="column wrapper positive">
+                    <span>+{{ '%0.1f'| format(e.performance|float) }}%<i class="fa-solid fa-arrow-up"></i></span>
+                  </div>
+                {% else %}
+                  <div class="column wrapper negative">
+                    <span>{{ '%0.1f'| format(e.performance|float) }}%<i class="fa-solid fa-arrow-down"></i></span>
+                  </div>
+                {% endif %}
+                <div class="column wrapper svg">
+                  <img src="/static/img/month_performance/{{ e.id }}.svg" class="chart-icon" alt="{{e.name}} strategy icon">
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        <div class="dot-list">
+          {% for e in context.top_performer %}
+            {% if e==context.top_performer[0] %}
+              <span class="dot current"></span>
+            {% else %}
+              <span class="dot"></span>
+            {% endif %}
+          {% endfor %}
+        </div>
+        </div>
+      </div>
+    </header>
+    <main class="row">
+      <div class="column left" id="ssearch-strategies-container">
+        <div class="external-container large">
+          <div class="hlist" id="ssearch-search">
+            <form class="search-bar hitem" id="search-form">
+              <input type="search" placeholder="Search strategy..." aria-label="Search strategy through site content" id="search-input">
+              <button class="fa-solid fa-magnifying-glass" id="search-btn" aria-label="search button"></button>
+            </form>
+            <div class="hlist" id="ssearch-trading-types">
+              <span>Trading type:</span>
+              <button class="iberu-button hitem" id="scalping">Scalping</button>
+              <button class="iberu-button hitem" id="intraday">Intraday</button>
+              <button class="iberu-button hitem" id="swing">Swing</button>
+            </div>
+          </div>
+          <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
+            <caption class="visually-hidden">This table contains the top performing strategies in the last 12 months
+              ordered by the highest return. For each strategy are provided its trading type, winrate, performance(return) and the price.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Asset</th>
+                <th scope="col">Strategy</th>
+                <th scope="col">Type</th>
+                <th scope="col">WR%</th>
+                <th scope="col">Performance</th>
+                <th scope="col">Price</th>
+                <th scope="col">Chart</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for e in context.strategies_earning %}
+                <tr class="{{ e.trading_type }}">
+                  <td>
+                    <div class="hlist">
+                      {% for i in e.asset[:4] %}
+                        {% if loop.index > 3 %}
+                          <div>
+                            <p class="medium multi icon">+{{ e.asset|length - 3 }}</p>
+                          </div>
+                        {% else %}
+                          <div>
+                            <img src="{{ i.icon }}" class="multi icon">
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </td>
+                  <td><a href="{{ url_for('main.ssearch')}}/{{ e.name.replace(' ', '%20') }}">{{ e.name }}</a></td>
+                  <td>{{ e.trading_type }}</td>
+                  {% if e.winrate >= 50 %}
+                    <td class="positive">{{ '%0.2f'| format(e.winrate|float) }}%</td>
+                  {% else %}
+                    <td class="negative">{{ '%0.2f'| format(e.winrate|float) }}%</td>
+                  {% endif %}
+                  {% if e.rate_of_return >= 0 %}
+                    <td class="positive">{{ '%0.2f'| format(e.rate_of_return|float) }}%</td>
+                  {% else %}
+                    <td class="negative">{{ '%0.2f'| format(e.rate_of_return|float) }}%</td>
+                  {% endif %}
+                  {% if e.price == 0 %}
+                    <td>Free</td>
+                  {% else %}
+                    <td>${{ '%0.2f'| format(e.price|float) }}</td>
+                  {% endif %}
+                  <td><img src="/static/img/general_performance/{{ e.id }}.svg" class="chart-icon" alt="{{ e.name }} strategy icon"></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <div class="hlist spaced">
+        <div class="hitem logo">
+          <a href="{{ url_for('main.index') }}">
+            <img src="/static/img/logo.png" alt="Iberu Trading Strategies logo">
+          </a>
+        </div>
+        <div class="hlist">
+          <a href="https://www.facebook.com" class="hitem"><i class="fa-brands fa-facebook-f"></i>  Facebook</a>
+          <a href="https://www.twitter.com" class="hitem"><i class="fa-brands fa-twitter"></i>  Twitter</a>
+          <a href="https://www.discord.com" class="hitem"><i class="fa-brands fa-discord"></i>  Discord</a>
+          <a href="https://web.telegram.org/z/" class="hitem"><i class="fa-brands fa-telegram"></i>  Telegram</a>
+        </div>
+      </div>
+      <span>Copyright © 2023, Iberu-TS. All Rights Reserved</span>
+    </footer>
+  </body>
+</html>

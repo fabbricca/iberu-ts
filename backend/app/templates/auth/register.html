@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+    <head>
+        <meta charset="utf-8">
+        <title>Register</title>
+        <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
+        <link rel="stylesheet" href="/static/css/style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <main class="row" id="login-row">
+            <div class="column left" id="iberu-container">
+                <div>
+                    <a href="{{ url_for('main.index') }}"><img src="/static/img/logo.png" alt="Iberu Trading Strategies logo"></a>
+                    <h1>OWN YOUR FUTURE, BE FREE.</h1>
+                    <a href="{{ url_for('auth.login') }}" class="iberu-button">LOGIN</a>
+                </div>
+            </div>
+            <div class="column right" id="login-container">
+                <div class="login-container">
+                    <h1>REGISTER</h1>
+                    <form method="post">
+                        {{ form.hidden_tag() }}
+                        {{ form.name.label }}
+                        {{ form.name(size=32, placeholder="Name", autocomplete="off") }}
+                        {% for error in form.name.errors %}
+                            <span class="negative">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.surname.label }}
+                        {{ form.surname(size=32, placeholder="Surname", autocomplete="off") }}
+                        {% for error in form.surname.errors %}
+                            <span class="negative">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.email.label }}
+                        {{ form.email(size=32, placeholder="Email", autocomplete="off") }}
+                        {% for error in form.email.errors %}
+                            <span class="negative">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.password.label }}
+                        {{ form.password(size=32, placeholder="Password", autocomplete="off") }}
+                        {% for error in form.password.errors %}
+                            <span class="negative">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.rpassword.label }}
+                        {{ form.rpassword(size=32, placeholder="Repeat Password", autocomplete="off") }}
+                        {% for error in form.rpassword.errors %}
+                            <span class="negative">[{{ error }}]</span>
+                        {% endfor %}
+                        <div class="authentication">
+                            {{ form.submit(class="iberu-button inverse") }}
+                        </div>
+                    </form>
+                    <div class="alternative-auth">
+                        <h2>Or Sign Up using:</h2>
+                        <a href="{{ url_for('auth.google') }}" class="google-login">
+                            <img id="google" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/2048px-Google_%22G%22_Logo.svg.png" alt="Google">
+                        </a>
+                    </div>
+                </div>
+            </div>         
+        </main>
+    </body>
+</html>

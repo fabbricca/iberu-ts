@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <title>Trading Strategies & Crypto Signals Marketplace | Iberu-TS</title>
+    <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
+    <link rel="stylesheet" href="/static/css/css.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script async src="https://kit.fontawesome.com/b11c5c9d0c.js" crossorigin="anonymous"></script>
+    <script type="module" defer src="/static/js/base.js"></script>
+  </head>
+  <body>
+    <nav>      
+      <div class="logo">
+        <a href="{{ url_for('main.index') }}">
+          <img src="/static/img/logo.png" alt="Iberu Trading Strategies logo">
+        </a>
+      </div>
+
+      <div class="navbar">
+        <button class="navbar-cancel" aria-label="Close navbar">
+          <i class="fas fa-times fa-xl"></i>
+        </button>
+        <ul class="navbar-items">
+          {% if context.current == 1 %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}" class="current"><i class="fa-solid fa-chart-simple"></i> Strategies</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-chart-simple"></i> Strategies</a>
+            </li>
+          {% endif %}
+          {% if context.current == 2 %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-at"></i> Backtest</a>
+            </li>
+          {% endif %}
+          {% if context.current == 3 %}
+            <li>
+              <a href="{{ url_for('main.index') }}"  class="current"><i class="fa-solid fa-users"></i> Creators</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-users"></i> Creators</a>
+            </li>
+          {% endif %}
+          {% if context.current == 3 %}
+            <li>
+              <a href="{{ url_for('main.index') }}"  class="current"><i class="fa-solid fa-circle-info"></i> About</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-circle-info"></i> About</a>
+            </li>
+          {% endif %}
+        </ul>
+
+        {% if not current_user.is_authenticated %}
+          <div class="navbar-auth">
+            <a href="{{ url_for('auth.login') }}" class="iberu-button medium inverse" id="login">Log In</a>
+            <a href="{{ url_for('auth.register') }}" class="iberu-button medium" id="register">Register</a>
+          </div>
+        {% endif %}
+
+        <div class="navbar-theme">
+          <div>
+            <i class="fa-solid fa-circle-half-stroke"></i>
+            <span>Theme</span>
+          </div>
+          <input type="checkbox" id="theme-toggle" name="toggle" aria-label="theme toggle">
+          <label for="theme-toggle" tabindex="0">
+            <span class="visually-hidden">theme toggle</span>
+            <i id="moon" class="fa-solid fa-moon"></i>
+            <i id="sun" class="fa-solid fa-sun"></i>
+          </label>
+        </div>
+      </div>
+
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.user') }}" class="navbar-user"><img id="user-image" src="{{ url_for('main.retrieve_avatar') }}"></a>
+      {% else %}
+        <a href="/" class="navbar-creator iberu-button medium"><i class="fa-solid fa-gift"></i> Creator</a>
+      {% endif %} 
+
+      <button class="navbar-menu" aria-label="Open navbar">
+        <i class="fa-solid fa-bars fa-xl"></i>
+      </button>
+    </nav>
+    <header class="row external-container narrow animate left horizontal hide" id="homepage-header-container">
+      <div id="homepage-registration" class="column vlist">
+        <h1 class="vitem">Unlock trading strategies that work</h1>
+        <h2 class="vitem">Discover the potential of your trading portfolio with Iberu-TS's trading strategies.</h2>
+        <h2 class="vitem">Sign up and get started today.</h2>
+        <div class="hlist">
+          <a href="{{ url_for('auth.register') }}" class="iberu-button big hitem"><i class="fa-solid fa-envelope fa-xl"></i><span>Register with Email</span></a>
+          <a href="{{ url_for('auth.google') }}" class="iberu-button big white hitem">
+            <img id="google-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/2048px-Google_%22G%22_Logo.svg.png" alt="Google">
+            <span>Continue with Google</span>
+          </a>
+        </div>
+      </div>
+      <div id="homepage-smartphone" class="column">
+        <img src="/static/img/strategy_page_l.jpeg" class="smartphone light animate vertical hide" id="smartphone-strategy-l" alt="Smartphone strategy page">
+        <img src="/static/img/strategy_search_l.jpeg" class="smartphone light animate vertical hide" id="smartphone-search-l" alt="Smartphone search strategy page">
+        <img src="/static/img/strategy_page_d.jpeg" class="smartphone dark animate vertical hide" id="smartphone-strategy-d" alt="Smartphone strategy page">
+        <img src="/static/img/strategy_search_d.jpeg" class="smartphone dark animate vertical hide" id="smartphone-search-d" alt="Smartphone search strategy page">
+      </div>
+    </header>
+    <main>
+      <div class="row panel animate right horizontal hide">
+        <div class="row rev external-container narrow" id="homepage-creator-container">
+          <img src="/static/img/creator.svg" id="homepage-creator-image" alt="">
+          <div class="vlist">
+            <h1 class="vitem">Become a creator and start earning with your strategy</h1>
+            <h2 class="vitem">If you possess your unique strategy and wish to share it, please reach out to our team at strategies@iberu-ts.com.</h2>
+            <h2 class="vitem">No fees involved.</h2>
+            <a href="" id="learn-more" class="iberu-button medium rounded">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="row animate vertical hide">
+        <div class="external-container narrow" id="homepage-strategies-container">
+          <h1>Top Performing Strategies</h1>
+          <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
+            <caption class="visually-hidden">This table contains the top performing strategies in the last 30 days
+              ordered by the highest return. For each strategy are provided its trading type, winrate, performance(return) and the price.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Coin</th>
+                <th scope="col">Strategy</th>
+                <th scope="col">Type</th>
+                <th scope="col">WR%</th>
+                <th scope="col">Performance</th>
+                <th scope="col">Price</th>
+                <th scope="col">Chart</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for e in context.strategies_earning %}
+                <tr>
+                  <td>
+                    <div class="hlist">
+                      {% for i in e.asset[:4] %}
+                        {% if loop.index > 3 %}
+                          <div>
+                            <p class="medium multi icon">+{{ e.asset|length - 3 }}</p>
+                          </div>
+                        {% else %}
+                          <div>
+                            <img src="{{ i }}" class="multi icon">
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </td>
+                  <td><a href="{{ url_for('main.ssearch')}}/{{ e.name.replace(' ', '%20') }}">{{ e.name }}</a></td>
+                  <td>{{ e.trading_type }}</td>
+                  {% if e.win / e.total >= 0.5 %}
+                    <td class="positive">{{ '%0.1f'| format(e.win / e.total * 100|float) }}%</td>
+                  {% else %}
+                    <td class="negative">{{ '%0.1f'| format(e.win / e.total * 100|float) }}%</td>
+                  {% endif %}
+                  {% if e.performance >= 0 %}
+                    <td class="positive">{{ '%0.2f'| format(e.performance|float) }}%</td>
+                  {% else %}
+                    <td class="negative">{{ '%0.2f'| format(e.performance|float) }}%</td>
+                  {% endif %}
+                  {% if e.price == 0 %}
+                    <td>Free</td>
+                  {% else %}
+                    <td>${{ '%0.2f'| format(e.price|float) }}</td>
+                  {% endif %}
+                  <td><img src="/static/img/month_performance/{{ e.id }}.svg" class="chart-icon" alt="{{ e.name }} strategy icon"></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="homepage-steps-container" class="row external-container narrow">
+        <h1>How Iberu-TS Works</h1>
+        <div id="homepage-steps" class="hlist">
+          <div id="first-arrow" class="column animate right horizontal hide">
+            <div class="arrow">
+              <div class="arrow-down left"></div>
+              <div class="arrow-down right"></div>
+              <img src="/static/img/step1.png" id="first-step" alt="Iberu-TS receives strategies from the creator pool">
+              <div class="circle"></div>
+            </div>
+            <section>
+              <h2>CREATORS POOL</h2>
+              <p class="secondary-info">Iberu-TS's creator pool is a group of individuals who develop the systematic trading strategies you can find on our platform. Their experience is evaluated based on both the quality of the strategies they provide and their educational background.
+              </p>
+            </section>
+          </div>
+          <div id="second-arrow" class="column animate right horizontal hide">
+            <div class="arrow">
+              <div class="arrow-down left"></div>
+              <div class="arrow-down right"></div>
+              <img src="/static/img/step2.png" id="second-step" alt="A test tube being tested">
+              <div class="circle"></div>
+            </div>
+            <section>
+              <h2>BACKTEST</h2>
+              <p class="secondary-info">In order to ensure that our users are provided with only profitable strategies, we conduct various tests, such as out-of-sample backtests, walk-forward analyses, and Monte Carlo simulations. We continue to monitor the performance of all strategies once they are live in order to improve our services, and ensure that they remain up-to-date.
+              </p>
+            </section>
+          </div>
+          <div id="third-arrow" class="column animate right horizontal hide">
+            <div class="arrow">
+              <div class="arrow-down left"></div>
+              <div class="arrow-down right"></div>
+              <img src="/static/img/step3.png" id="third-step" alt="An ampoule representing the final result of our testing">
+              <div class="circle"></div>
+            </div>
+            <section>
+              <h2>STRATEGIES</h2>
+              <p class="secondary-info">Strategies that meet our criteria will undergo an incubation period during which we run live tests to obtain additional evidence of their actual performance. Only the strategies that continue to fulfill our benchmark will be eligible for inclusion on the Iberu-TS marketplace.
+              </p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <div class="hlist spaced">
+        <div class="hitem logo">
+          <a href="{{ url_for('main.index') }}">
+            <img src="/static/img/logo.png" alt="Iberu Trading Strategies logo">
+          </a>
+        </div>
+        <div class="hlist">
+          <a href="https://www.facebook.com" class="hitem"><i class="fa-brands fa-facebook-f"></i>  Facebook</a>
+          <a href="https://www.twitter.com" class="hitem"><i class="fa-brands fa-twitter"></i>  Twitter</a>
+          <a href="https://www.discord.com" class="hitem"><i class="fa-brands fa-discord"></i>  Discord</a>
+          <a href="https://web.telegram.org/z/" class="hitem"><i class="fa-brands fa-telegram"></i>  Telegram</a>
+        </div>
+      </div>
+      <span>Copyright © 2023, Iberu-TS. All Rights Reserved</span>
+    </footer>
+  </body>
+</html>

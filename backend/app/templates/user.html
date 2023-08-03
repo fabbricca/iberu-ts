@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <title>Portfolio | Iberu-TS</title>
+    <meta name="description" content="Portfolio">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.css">
+    <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
+    <link rel="stylesheet" href="/static/css/css.css">
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://unpkg.com/chart.js@4.2.0/dist/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/easy-pie-chart/2.1.6/easypiechart.js" integrity="sha512-pqsFIC0/JH9kXk5VaPG+emTgUBxwl5yo+rY+t/OZmhzH+PhP6PyyqY/hAkXxWw1TUcZXdpTdtHZwewp7hoYV9Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.js"></script>
+    <script async src="https://kit.fontawesome.com/b11c5c9d0c.js" crossorigin="anonymous"></script>
+    <script type="module" src="/static/js/user_chart.js"></script>
+    <script type="module" defer src="/static/js/base.js"></script>
+  </head>
+  <body>
+    <nav>      
+      <div class="logo">
+        <a href="{{ url_for('main.index') }}">
+          <img src="/static/img/logo.png" alt="Iberu Trading Strategies logo">
+        </a>
+      </div>
+
+      <div class="navbar">
+        <button class="navbar-cancel" aria-label="Close navbar">
+          <i class="fas fa-times fa-xl"></i>
+        </button>
+        <ul class="navbar-items">
+          {% if context.current == 1 %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}" class="current"><i class="fa-solid fa-chart-simple"></i> Strategies</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-chart-simple"></i> Strategies</a>
+            </li>
+          {% endif %}
+          {% if context.current == 2 %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-at"></i> Backtest</a>
+            </li>
+          {% endif %}
+          {% if context.current == 3 %}
+            <li>
+              <a href="{{ url_for('main.index') }}"  class="current"><i class="fa-solid fa-users"></i> Creators</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-users"></i> Creators</a>
+            </li>
+          {% endif %}
+          {% if context.current == 3 %}
+            <li>
+              <a href="{{ url_for('main.index') }}"  class="current"><i class="fa-solid fa-circle-info"></i> About</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-circle-info"></i> About</a>
+            </li>
+          {% endif %}
+        </ul>
+
+        {% if not current_user.is_authenticated %}
+          <div class="navbar-auth">
+            <a href="{{ url_for('auth.login') }}" class="iberu-button medium inverse" id="login">Log In</a>
+            <a href="{{ url_for('auth.register') }}" class="iberu-button medium" id="register">Register</a>
+          </div>
+        {% endif %}
+
+        <div class="navbar-theme">
+          <div>
+            <i class="fa-solid fa-circle-half-stroke"></i>
+            <span>Theme</span>
+          </div>
+          <input type="checkbox" id="theme-toggle" name="toggle" aria-label="theme toggle">
+          <label for="theme-toggle" tabindex="0">
+            <span class="visually-hidden">theme toggle</span>
+            <i id="moon" class="fa-solid fa-moon"></i>
+            <i id="sun" class="fa-solid fa-sun"></i>
+          </label>
+        </div>
+      </div>
+
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.user') }}" class="navbar-user"><img id="user-image" src="{{ url_for('main.retrieve_avatar') }}"></a>
+      {% else %}
+        <a href="/" class="navbar-creator iberu-button medium"><i class="fa-solid fa-gift"></i> Creator</a>
+      {% endif %} 
+
+      <button class="navbar-menu" aria-label="Open navbar">
+        <i class="fa-solid fa-bars fa-xl"></i>
+      </button>
+    </nav>
+
+    <main id="user-main" class="row">
+
+      <div id="user-navbar-container" class="column">
+        <div class="vlist">
+          <button id="overview" class="vitem current">Overview</button>
+          <button id="subscription" class="vitem">Subscription</button>
+          <button id="settings" class="vitem">Settings</button>
+          <button class="vitem">API</button>
+        </div>
+      </div>
+
+      <div id="user-overview-container" class="column">
+
+        <div id="user-header-container" class="row panel">
+          <img id="user-image" class="big" src="{{ url_for('main.retrieve_avatar') }}">
+          <div id="user-info" class="vlist">
+            <h1 class="vitem">{{ current_user.username }}</h1>
+            <div class="vitem hlist">
+              <h2 class="secondary-info hitem">UserID</h2>
+              <h2 class="secondary-info hitem">User Type</h2>
+              <h2 class="secondary-info hitem">Referral code</h2>
+            </div>
+            <div class="vitem hlist">
+              <h2 class="secondary-info hitem">{{ current_user.id }}</h2>
+              <h2 class="secondary-info hitem">{{ current_user.type }}</h2>
+              <h2 class="secondary-info hitem">{{ context.referral_code }}</h2>
+            </div>
+          </div>
+          <div id="user-achievements">
+            <div class="thumbnail">
+              <div class="header">
+                <h2>Invite 10 friends to receive 10% discount</h2>
+              </div>
+              <div class="body">
+                {% if context.invites > 10 %}
+                  <progress max="10" value="10"></progress>
+                {% else %}
+                  <progress max="10" value="{{ context.invites }}"></progress>
+                {% endif %}
+                <p class="secondary-info">{{ context.invites }} out of 10 friends invited</p>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="row">
+
+          <div id="user-portfolio-container" class="column">
+            <div id="user-performance" class="row">
+              <h1>Estimated earnings</h1>
+              <button id="portfolio-show-balance" class="iberu-button dark xsmall fa-solid fa-eye"></button>
+              <button id="portfolio-hide-balance" class="iberu-button dark xsmall fa-solid fa-eye-slash"></button>
+            </div>
+            <div id="user-balance" class="row">
+            </div>
+            <div id="user-chart-container" class="row">
+              <div id="user-chart">
+                <lightweight-performance-chart data-strategy="{{ strategy }}" data-user="{{ current_user.username }}" 
+                  data-market="{{ context.market }}" data-indicators="{{ context.indicators }}">  
+                </lightweight-performance-chart>
+              </div>
+            </div>
+    
+            <div id="user-strategies-container" class="row">
+              <h1>{{ current_user.name }}'s Strategies</h1>
+              <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
+                <caption class="visually-hidden">This table contains the top performing strategies in the last 30 days
+                  ordered by the highest return. For each strategy are provided its trading type, winrate, performance(return) and the price.</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Asset</th>
+                    <th scope="col">Strategy</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">WR%</th>
+                    <th scope="col">Performance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for e in context.strategies_earning %}
+                    <tr class="{{ e.trading_type }}">
+                      <td>
+                        <div class="hlist">
+                          {% for i in e.asset[:4] %}
+                            {% if loop.index > 3 %}
+                              <div>
+                                <p class="medium multi icon">+{{ e.asset|length - 3 }}</p>
+                              </div>
+                            {% else %}
+                              <div>
+                                <img src="{{ i }}" class="multi icon">
+                              </div>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                      </td>
+                      <td><a href="{{ url_for('main.ssearch')}}/{{ e.name.replace(' ', '%20') }}">{{ e.name }}</a></td>
+                      <td>{{ e.trading_type }}</td>
+                      {% if e.win / e.total >= 0 %}
+                        <td class="positive">{{ '%0.2f'| format(e.win / e.total * 100|float) }}%</td>
+                      {% else %}
+                        <td class="negative">{{ '%0.2f'| format(e.win / e.total * 100|float) }}%</td>
+                      {% endif %}
+                      {% if e.performance >= 0 %}
+                        <td class="positive">{{ '%0.2f'| format(e.performance|float) }}%</td>
+                      {% else %}
+                        <td class="negative">{{ '%0.2f'| format(e.performance|float) }}%</td>
+                      {% endif %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <div id="user-doughnut-container" class="row">
+              <div id="user-doughnut">
+                <div class="column left" id="user-assets">
+                  <canvas></canvas>
+                </div>
+                <div class="column" id="user-strategies">
+                  <canvas></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="user-suggestions-container" class="column">
+            <div id="user-suggestions" class="row">
+              <h1>Recommended For {{ current_user.name }}</h1>
+              <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
+                <caption class="visually-hidden">This table contains the top performing strategies in the last 30 days
+                  ordered by the highest return. For each strategy are provided its trading type, winrate, performance(return) and the price.</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Asset</th>
+                    <th scope="col">Strategy</th>
+                    <th scope="col">Performance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for e in context.suggestions %}
+                    <tr>
+                      <td><img src="{{ e.product.icon }}" class="icon" alt="{{ e.product.symbol }} coin icon"></td>
+                      <td><a href="{{ url_for('main.ssearch') }}/{{ e.product.name.replace(' ', '%20') }}">{{ e.product.name }}</a></td>
+                      {% if e.percentage >= 0 %}
+                        <td class="positive">{{ '%0.2f'| format(e.percentage|float) }}%</td>
+                      {% else %}
+                        <td class="negative">{{ '%0.2f'| format(e.percentage|float) }}%</td>
+                      {% endif %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <div id="user-services" class="row vlist">
+              <h1 class="vitem">More Services</h1>
+              <a href="{{ url_for('main.index') }}" class="vitem iberu-button dark medium">
+                <i class="fa-solid fa-comments fa-xl"></i>
+                <div class="vlist">
+                  <h2 class="vitem">FAQ</h2>
+                  <h3 class="vitem secondary-info">
+                    If you have any doubt look at our FAQ
+                  </h3>
+                </div>
+              </a>
+              <a href="https://www.youtube.com/@neurotrader888" class="vitem iberu-button dark medium">
+                <i class="fa-solid fa-graduation-cap fa-xl"></i>
+                <div class="vlist">
+                  <h2 class="vitem">Learn with us</h2>
+                  <h3 class="vitem secondary-info">Do you want to learn more about trading strategies?</h3>
+                </div>
+              </a>
+              <a href="{{ url_for('main.index') }}" class="vitem iberu-button dark medium">
+                <i class="fa-solid fa-comments fa-xl"></i>
+                <div class="vlist">
+                  <h2 class="vitem">FAQ</h2>
+                  <h3 class="vitem secondary-info">
+                    If you have any doubt look at our FAQ
+                  </h3>
+                </div>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div id="user-subscription-container" class="hide">
+        <div id="user-header-container" class="row panel">
+          <img id="user-image" class="big" src="{{ url_for('main.retrieve_avatar') }}">
+          <div id="user-info" class="vlist">
+            <h1 class="vitem">{{ current_user.username }}</h1>
+            <div class="vitem hlist">
+              <h2 class="secondary-info hitem">Subscriptions</h2>
+              <h2 class="secondary-info hitem">Active</h2>
+              <h2 class="secondary-info hitem">Referral code</h2>
+            </div>
+            <div class="vitem hlist">
+              <h2 class="secondary-info hitem">{{ context.active_subscriptions|length + context.ended_subscriptions|length }}</h2>
+              <h2 class="secondary-info hitem">{{ context.active_subscriptions|length }}</h2>
+              <h2 class="secondary-info hitem">{{ context.referral_code }}</h2>
+            </div>
+          </div>
+          <div id="user-achievements">
+            <div class="thumbnail">
+              <div class="header">
+                <h2>Invite 10 friends to receive 10% discount</h2>
+              </div>
+              <div class="body">
+                {% if context.invites > 10 %}
+                  <progress max="10" value="10"></progress>
+                {% else %}
+                  <progress max="10" value="{{ context.invites }}"></progress>
+                {% endif %}
+                <p class="secondary-info">{{ context.invites }} out of 10 friends invited</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="external-container narrow">
+          <h1>User subscriptions</h1>
+          <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
+            <caption class="visually-hidden">This table contains the user's last 20 subscription</caption>
+            <thead>
+              <tr>
+                <th scope="col">Strategy</th>
+                <th scope="col">Start Period</th>
+                <th scope="col">End Period</th>
+                <th scope="col">Status</th>
+                <th scope="col">Leverage</th>
+                <th scope="col">Asset</th>
+                <th scope="col">Quote</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in context.active_subscriptions %}
+                <tr>
+                  <td><a href="{{ url_for('main.ssearch') }}/{{ s.strategy.replace(' ', '%20') }}">{{ s.strategy }}</a></td>
+                  <td>{{ s.start }}</td>
+                  <td>{{ s.end }}</td>
+                  <td class="positive"><i class="fa-solid fa-circle positive"></i> Active</td>
+                  <td><input type="number" placeholder="{{ s.leverage }}" data-value=""></td>
+                  <td>
+                    <div class="hlist">
+                      {% for i in s.asset[:4] %}
+                        {% if loop.index > 3 %}
+                          <div>
+                            <p class="medium multi icon">+{{ s.asset|length - 3 }}</p>
+                          </div>
+                        {% else %}
+                          <div>
+                            <img src="{{ i }}" class="multi icon">
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </td>
+                  <td class="dropdown">
+                    <button class="hitem big dropdown-button">
+                      <img src="{{ s.quote }}" class="icon">
+                    </button>
+                    <div class="hide info modal">
+                      <div class="vlist">
+                        <button class="quote vitem big">
+                          <div class="hlist">
+                            <img src="/static/img/assets_icons/tetherusd.png" class="hitem icon" data-value="tetherusd">
+                            <div class="hitem">USDT</div>
+                          </div>
+                        </button>
+                        <button class="quote vitem big">
+                          <div class="hlist">
+                            <img src="/static/img/assets_icons/binanceusd.png" class="hitem icon" data-value="binanceusd">
+                            <div class="hitem">BUSD</div>
+                          </div>
+                        </button>
+                        <button class="quote vitem big">
+                          <div class="hlist">
+                            <img src="/static/img/assets_icons/usdcoin.png" class="hitem icon" data-value="usdcoin">
+                            <div class="hitem">USDC</div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+              {% for s in context.ended_subscriptions %}
+                <tr>
+                  <td><a href="{{ url_for('main.ssearch') }}/{{ s.strategy.replace(' ', '%20') }}">{{ s.strategy }}</a></td>
+                  <td>{{ s.start }}</td>
+                  <td>{{ s.end }}</td>
+                  <td class="negative"><i class="fa-solid fa-circle negative"></i> Expired</td>
+                  <td>{{ s.leverage }}</td>
+                  <td>
+                    <div class="hlist">
+                      {% for i in s.asset[:4] %}
+                        {% if loop.index > 3 %}
+                          <div>
+                            <p class="medium multi icon">+{{ s.asset|length - 3 }}</p>
+                          </div>
+                        {% else %}
+                          <div>
+                            <img src="{{ i }}" class="multi icon">
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </td>
+                  <td>
+                    <button class="big">
+                      <img src="{{ s.quote }}" class="icon">
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <button id="subscription-confirm" class="iberu-button medium submit">Confirm</button>
+        </div>
+      </div>
+
+      <div id="user-settings-container" class="external-container narrow hide">
+
+        <div id="user-personal-info">
+          <h1>Edit Profile</h1>
+          <div id="user-personal-image" class="vlist">
+            <h2 class="vitem">Profile</h2>
+            <div class="hlist">
+              <img id="user-image hitem" src="{{ url_for('main.retrieve_avatar') }}">
+              <div class="vlist hitem">
+                <form action="{{ url_for('main.upload_avatar') }}" class="dropzone iberu-button big vitem">
+                </form>
+                <button id="user-remove-picture" class="iberu-button big white negative vitem"><i class="fa-regular fa-trash-can fa-lg"></i>Remove picture</button>
+              </div>
+            </div>
+          </div>
+          <form id="user-edit-profile" action="{{ url_for('main.user_edit') }}" method="post">
+              {{ form.hidden_tag() }}
+              {{ form.name.label }}
+              {{ form.name(size=32, placeholder = current_user.name, autocomplete="off") }}
+              {{ form.surname.label }}
+              {{ form.surname(size=32, placeholder = current_user.surname, autocomplete="off") }}
+              {{ form.phone.label }}
+              {{ form.phone(size=32, placeholder = current_user.phone, autocomplete="off") }}
+              {{ form.discord.label }}
+              {{ form.discord(size=32, placeholder = current_user.discord, autocomplete="off") }}
+              {{ form.submit(class="iberu-button medium submit") }}
+          </form>
+          <h2 class="vitem">Settings</h2>
+        </div>
+
+        <div id="user-creator-banner">
+          <img src="/static/img/creator.svg" alt="">
+        </div>
+
+      </div>
+    
+    </main>
+    
+    <footer>
+      <div class="hlist spaced">
+        <div class="hitem logo">
+          <a href="{{ url_for('main.index') }}">
+            <img src="/static/img/logo.png" alt="Iberu Trading Strategies logo">
+          </a>
+        </div>
+        <div class="hlist">
+          <a href="https://www.facebook.com" class="hitem"><i class="fa-brands fa-facebook-f"></i>  Facebook</a>
+          <a href="https://www.twitter.com" class="hitem"><i class="fa-brands fa-twitter"></i>  Twitter</a>
+          <a href="https://www.discord.com" class="hitem"><i class="fa-brands fa-discord"></i>  Discord</a>
+          <a href="https://web.telegram.org/z/" class="hitem"><i class="fa-brands fa-telegram"></i>  Telegram</a>
+        </div>
+      </div>
+      <span>Copyright © 2023, Iberu-TS. All Rights Reserved</span>
+    </footer>
+  </body>
+</html>

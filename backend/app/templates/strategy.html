@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr" data-theme="dark" data-multiStrategy="false">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ context.strategy }} Strategy | Iberu-TS</title>
+    <meta name="description" content="Become part of the Iberu-TS community and automate your trading with our {{ context.strategy }} strategy.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
+    <link rel="stylesheet" href="/static/css/css.css">
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://unpkg.com/chart.js@4.2.0/dist/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/easy-pie-chart/2.1.6/easypiechart.js" integrity="sha512-pqsFIC0/JH9kXk5VaPG+emTgUBxwl5yo+rY+t/OZmhzH+PhP6PyyqY/hAkXxWw1TUcZXdpTdtHZwewp7hoYV9Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script async src="https://kit.fontawesome.com/b11c5c9d0c.js" crossorigin="anonymous"></script>
+    <script type="module" src="/static/js/strategy_page_function.js"></script>
+    <script type="module" src="/static/js/performance_chart.js"></script>
+    <script type="module" src="/static/js/strategy_chart.js"></script>
+    <script type="module" defer src="/static/js/base.js"></script>
+    <script async src="/static/node_modules/ta.js/ta.min.js"></script>
+    <script src="/static/node_modules/technicalindicators/dist/browser.es6.js"></script>
+  </head>
+  <body>
+    <nav>      
+      <div class="logo">
+        <a href="{{ url_for('main.index') }}">
+          <img src="/static/img/logo.png" alt="Iberu Trading Strategies logo">
+        </a>
+      </div>
+
+      <div class="navbar">
+        <button class="navbar-cancel" aria-label="Close navbar">
+          <i class="fas fa-times fa-xl"></i>
+        </button>
+        <ul class="navbar-items">
+          {% if context.current == 1 %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}" class="current"><i class="fa-solid fa-chart-simple"></i> Strategies</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-chart-simple"></i> Strategies</a>
+            </li>
+          {% endif %}
+          {% if context.current == 2 %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-at"></i> Backtest</a>
+            </li>
+          {% endif %}
+          {% if context.current == 3 %}
+            <li>
+              <a href="{{ url_for('main.index') }}"  class="current"><i class="fa-solid fa-users"></i> Creators</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-users"></i> Creators</a>
+            </li>
+          {% endif %}
+          {% if context.current == 3 %}
+            <li>
+              <a href="{{ url_for('main.index') }}"  class="current"><i class="fa-solid fa-circle-info"></i> About</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-circle-info"></i> About</a>
+            </li>
+          {% endif %}
+        </ul>
+
+        {% if not current_user.is_authenticated %}
+          <div class="navbar-auth">
+            <a href="{{ url_for('auth.login') }}" class="iberu-button medium inverse" id="login">Log In</a>
+            <a href="{{ url_for('auth.register') }}" class="iberu-button medium" id="register">Register</a>
+          </div>
+        {% endif %}
+
+        <div class="navbar-theme">
+          <div>
+            <i class="fa-solid fa-circle-half-stroke"></i>
+            <span>Theme</span>
+          </div>
+          <input type="checkbox" id="theme-toggle" name="toggle" aria-label="theme toggle">
+          <label for="theme-toggle" tabindex="0">
+            <span class="visually-hidden">theme toggle</span>
+            <i id="moon" class="fa-solid fa-moon"></i>
+            <i id="sun" class="fa-solid fa-sun"></i>
+          </label>
+        </div>
+      </div>
+
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.user') }}" class="navbar-user"><img id="user-image" src="{{ url_for('main.retrieve_avatar') }}"></a>
+      {% else %}
+        <a href="/" class="navbar-creator iberu-button medium"><i class="fa-solid fa-gift"></i> Creator</a>
+      {% endif %} 
+
+      <button class="navbar-menu" aria-label="Open navbar">
+        <i class="fa-solid fa-bars fa-xl"></i>
+      </button>
+    </nav>
+
+    <main id="strategy" class="external-container large">
+
+      <div class="modal" id="strategy-terms-conditions">
+        <div class="header">
+          <h1>Copy Trading Terms & Conditions</h1>
+          <button class="close"  aria-label="Close buy modal">
+            <i class="fas fa-times fa-xl"></i>
+          </button>
+        </div>
+        <div class="body terms-conditions">
+          <section>
+            <h2>1. Iberu-TS Copy Trading Schedule of Terms And Conditions</h2>
+            <p>
+            1.1. Iberu-TS Copytrading (hereinafter the “copy trade service” or “copy trading services” or “copy trading”) is a service that allows users (a “Copier” or “you” or “your”) to copy trades carried out by other traders (a “Master” or a “trader”). l You can only be either a Copier or a Master.
+            </p>
+            <p>
+            1.2. This Schedule sets out the specific terms that will apply to you when using the copy trade service on our Platform. By proceeding beyond this page, you acknowledge that you have read and understood, and agree to the terms set out in this Schedule.
+            </p>
+            <p>
+            1.3. The terms in this Schedule apply to you in addition to our Terms and Conditions, which apply to all of our services including copy trading. Where there is a conflict between the Terms and Conditions and this Schedule, the terms of this Schedule shall prevail. Unless otherwise defined, capitalised words in this Schedule will have the same meaning given to those words in the Terms and Conditions. In the case of a conflict the capitalised words in this schedule shall prevail. By using our copy trade service, you agree to the term in this Schedule along with the fees from us or a Master.
+            </p>
+            </section>
+            <section>
+            <h2>2. Risk Disclosure</h2>
+            <p>
+            2.1. Please note that this Risk Disclosure is in addition to any risk disclosure in relation to products traded on our platform. In making a decision to copy a specific trader or traders, strategy and/or portfolio, you should consider your financial situation, including your financial commitments. You should understand that copy trading is highly speculative and that you could sustain significant losses exceeding the master amount used to copy a trader or traders. You should in particular be aware of the following risks associated with copy trading:
+                (a) copy trading involves automated trading execution whereby trades are opened and closed in your account without your manual intervention and further instructions from you;
+                (b) if you manually modify or close an order generated by the Copy Trader functionality, you may achieve a materially different result than the trader that you copied;
+                (c) copied trades in amounts lower than the minimum trade (as specified on our platform) will not be opened;
+                (d) if you are copying all trades which are currently open in relation to a Master you choose to copy, we may open your position at the best available price at the time the trade is copied and not at the price at which the trade being copied was originally opened;
+                (e) cash-out and withdrawals by the Master, strategy and/or portfolio you are copying may also generate a materially different result for you than the Master that you copied. This is due to a number of different factors including your starting account balance, the effect of the difference in trading proportions, the minimum trade size, your account settings, differences in spread, interest and investment price at the time of your investment, and also the difference in fees that may be incurred;
+                (f) following and/or copying the trading decisions of inexperienced and/or unprofessional traders creates risk and we make no representations as to the level of expertise, skill and care of a particular trader you choose to follow and/or copy;
+                (g) you may be copying traders whose ultimate purpose or intention, or financial status may differ from yours; and/or
+                (h) following and/or copying traders or portfolios that trade in, or which include products that are not available to you (whether as a result of Applicable Law or otherwise) and where a replacement equivalent trade cannot be executed may result in the economic performance, portfolio composition, risk rating and other factors relating to your portfolio deviating from the portfolio of the copied trader or the Copy Portfolio.
+            </p>
+            </section>
+            <section>
+            <h2>3. Trade Execution</h2>
+            <p>
+            3.1. The Platform provides you with the ability to interact, follow and copy other traders, strategies and/or portfolios by using the information, as well as providing you with "social trading features". Social trading features include detailed account information, trading histories, risk profiles, and other information in relation to a Master’s strategies and/or portfolios that may be useful to you when deciding whether to copy such Master, strategy and/or portfolio.
+            </p>
+            <p>
+            3.2. Copy trading is a trading functionality which allows you to copy the account of other traders. You do this by either copying a specific Master or copying a Copy Portfolio. By placing a copy trade instruction through our Platform, you are authorising and instructing us to execute trades for your account that automatically mirror the account of the Master to the maximum extent possible subject to limitations in the service or the copy trader functionality which may be disclosed on our Platform from time to time, without any prior consultation, consent of approval. The copy trades may be executed on a pro rata basis and in relation to the same products and the same trading instructions. As a result, we are authorised open and close positions, set limits and perform all other actions necessary to carry out the copy trading service.
+            </p>
+            <p>
+            3.3. We may be unable to copy trades in exactly the same manner as the Master or the Copy Portfolio for the following reasons:
+                (a) such trade may be unavailable to you or your account as a result of Applicable Law or otherwise.
+                (b) We will not open trades in amounts lower than the minimum trade.
+            </p>
+            <p>
+            3.4. The copy trade service may result in trades in a number of instruments. Each trade opened on your behalf through copy trading will usually be classified under the same asset class as classified in the copied account.
+            </p>
+            <p>
+            3.5. If you are restricted from trading a certain asset class or specific product due to Applicable Law, other regulatory requirements or any other reason that we may decide at our sole discretion, then we may at our sole discretion, take reasonable steps, where permitted by Applicable Law and where our service enables this, to ensure that an equivalent or similar trade is opened in your account to replace the restricted trade (for example, replacing a derivative trade with a trade in a similar underlying product or vice versa).
+            </p>
+            <p>
+            3.6. If we replace a trade for you, we cannot guarantee that the risk rating and economic performance of the replacement trade will match that of the restricted trade. Where in our sole discretion we do not replace a trade with an equivalent or similar trade for any reason, your economic performance, portfolio composition, risk rating and other factors relating to your portfolio may deviate from that of the Master or portfolio being copied.
+            </p>
+            <p>
+            3.7. Before entering into a copy trade, you will need to have sufficient balances of funds in your account to be put towards a copy trade.
+            </p>
+            <p>
+            3.8. Where you have insufficient funds, you agree that we shall apply whatever balances that are available in your account to the execution of the trade.
+            </p>
+            <p>
+            3.9. Where there are no remaining funds in your account to copy a trade, any subsequent copy trade orders will not be placed.
+            </p>
+            <p>
+            3.10. In ensuring that we are able to copy a trade for you to the maximum extent permissible, you authorise us in our sole discretion to allocate the balance available in your account proportionate to the copied account.
+            </p>
+            <p>
+            3.11. When we automatically execute an order based on your instruction to copy a trader or a portfolio, we will not be required to seek your consent, prior approval or any confirmation from you prior to and for the execution of such an order.
+            </p>
+            <p>
+            3.12. There are a number of order restrictions when copy trading, including on the minimum and maximum amount that can be invested in any trader or portfolio that you copy, the minimum amount on any single copy trade, and the maximum number of traders that you can copy. The full restrictions are listed on our website and may be amended from time to time at our sole discretion. Open trades that are in breach of these order restrictions will be closed out at our discretion.
+            </p>
+            <p>
+            3.13. When you are using our Copy Trader service, you can choose to copy:
+                (a) all trades which are currently open in a certain account as well as new trades which are opened after you begin to copy the trader in such account; or
+                (b) only new trades which are opened after you begin to copy the trader's account. This means that we will not copy any trades in the trader's account which were entered into before this point.
+            </p>
+            </section>
+            <section>
+            <h2>4. Limitations of Liability</h2>
+            <p>
+            4.1. WE PROVIDE OUR SERVICES INCLUDING OUR COPY TRADE ON AN “AS IS” BASIS. TO THE MAXIMUM EXTENT PERMITTED UNDER APPLICABLE LAW WE PROVIDE NO WARRANTY AND MAKE NO REPRESENTATIONS ON THE QUALITY OF OUR PLATFORM AND OUR SERVICE. BY USING OUR SERVICES, YOU DO SO SOLELY AT YOUR OWN RISK. UNDER NO CIRCUMSTANCES AND UNDER NO THEORY OF LAW (TORT, CONTRACT, STRICT LIABILITY OR OTHERWISE), SHALL WE OR ANY OF THE INDEMNITEES BE LIABLE TO YOU OR ANY OTHER PERSON FOR ANY DAMAGES ARISING FROM THE USE, THE PLATFORM, THE SITE, THIRD-PARTY CONTENT OR ANY ACCOUNT, REGARDLESS OF WHETHER SUCH DAMAGES ARE DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER, INCLUDING DAMAGES FOR TRADING LOSSES, LOSS OF INFORMATION, BUSINESS INTERRUPTION OR LOST PROFITS, LOST SAVINGS, OR LOSS OF DATA, OR LIABILITIES UNDER ANY CONTRACT, NEGLIGENCE, STRICT LIABILITY, OR OTHER THEORY ARISING OUT OF OR RELATING IN ANY MANNER TO THE SITE, THE PLATFORM, THIRD-PARTY CONTENT OR ANY ACCOUNT OR FOR ANY CLAIM OR DEMAND BY ANY THIRD PARTY, EVEN IF WE KNEW OR HAD REASON TO KNOW OF THE POSSIBILITY OF SUCH DAMAGES, CLAIM OR DEMAND IF THE FOREGOING DISCLAIMER AND WAIVER OF LIABILITY SHOULD BE DEEMED INVALID OR INEFFECTIVE.
+            </p>
+            <p>
+            4.2. In addition, to the extent permitted by Applicable Law, we will not be liable for (i) any actions we take in order to carry out your instructions in relation to a copy trade or (ii) any decisions or actions taken by a Master or strategy that you have chosen to copy.
+            </p>
+            <p>
+            4.3. We reserve the right to assess whether copy trading is a suitable investment tool for you and under what conditions (the "Suitability Assessment"). The result of the Suitability Assessment if we should conduct it is determined by information and documents provided to us by you at our request, which you can update at any time.
+            </p>
+            <p>
+            4.4. We may establish your investment profile on the basis of your Suitability Assessment, and your ability to enter into copy trades may be limited by your Suitability Assessment. If we determine that copy trading is not a suitable investment tool for you, then you will not be permitted to access the copy trading functionalities of our Platform. We are not liable for any losses that you may suffer as a result of providing false or misleading information as part of your Suitability Assessment, including where this leads to us creating an inaccurate investment profile for you.
+            </p>
+            <p>
+            4.5. Notwithstanding the provision above to the maximum permitted extent under Applicable Law, copy trading shall not amount to any form of investment, portfolio or asset management.
+            </p>
+            <p>
+            4.6. To the maximum extent permitted by Applicable Law, nothing in our copy trade services or functionality shall amount to any personalised investment recommendations, investment advice, tax related advice or other financial advice of any kind.
+            </p>
+            <p>
+            4.7. Any explanation or information which we give to you as part of our services, or about the performance of the copy trade is not intended to be and should not be considered as any form of investment advice. Any information provided by us through our Platform is solely for informational purposes.
+            </p>
+            <p>
+            4.8. You should use any information gathered from our website or social trading features as a starting point for your own independent research and investment decision making. However, you should not make investment decisions based on information provided on our platform or by our community.
+            </p>
+            <p>
+            4.9. We will take reasonable steps to monitor the performance of any copied Master under the copy trading functionality, as well as the performance of the functionality of our copy trade service.
+            </p>
+            <p>
+            4.10. We reserve the right to pause, stop, or block: (a) any Master from being copied under the Copy Trader functionality; and (b) any portfolio or trading strategy from being copied under the Copy Portfolio functionality. In this case, open trades entered into as a result of the Copy Trader or Copy Portfolio functionality will be closed.
+            </p>
+            <p>
+            4.11. We reserve the right to terminate the Copy Trader or Copy Portfolio service at our discretion (including if you no longer meet the criteria to receive the services or it is not feasible to provide the services as a result of any rules or regulations applicable to us) by giving written notice to you.
+            </p> 
+            <p>
+            4.12. We may also terminate the Copy Trader or Copy Portfolio service if we suspect or have reason to believe that (i) prohibited trading activities, including manipulative or abusive trading activities, are being conducted; (ii) fraudulent of incorrect information has been provided during the account opening process; or (iii) you have otherwise acted in bad faith.
+            </p>
+            <p>
+            4.13. On termination of the Copy Trader or Copy Portfolio service, open trades entered into a result of these functionalities will be closed.
+            </p>
+            <p>
+            4.14. We reserve the right to amend the terms of the copy trader or copy portfolio service without further consent from you.
+            </p>
+            </section>
+            <section>
+            <h2>5. Disclaimers</h2>
+            <p>
+              5.1. We do not represent or guarantee the performance of any trader, investment, account, portfolio, or strategy. We do not guarantee the recurrence of past rates of return that have been made by a Master or portfolio you choose to copy, and the profits (or losses) you make or incur may not match those of a Master or portfolio you copy.
+            </p>
+            <p>
+              5.2. Past performance, risk scores, statistics, and any other information with respect to our Platform’s traders under our Copy Trader and/or Copy Portfolio functionality, or of different portfolios and trading strategies under our Copy Portfolio functionality are not reliable indicators of future performance.
+            </p>
+            <p>
+              5.3. We do not represent or guarantee that you will achieve profits or losses similar to those shown to a trader or portfolio that you are copying. Conflicts of Interest
+            </p>
+            </section>
+        </div>
+      </div>
+
+      <div id="strategy-header-container" class="row">
+        <button id="start-tutorial" class="panel-info fa-solid fa-question" aria-label="Start Tutorial"></button>
+        <div id="strategy-header">
+          <h1>{{ context.strategy }} Strategy</h1>
+          <p>by {{ context.creator }}</p>
+        </div>
+        <div id="strategy-doughnut-chart" class="hlist hide">
+          <div class="easy-pie-chart" data-percent="{{ context.percentage[0] }}">
+            <span class="show center">{{ context.performance.sharpe_ratio }}</span>
+            <div class="hide info modal">
+              <h3>Sharpe Ratio</h3>
+              <p><strong>Circle:</strong> sharpe ratio compared to backetest results</p>
+              <p><strong>Description:</strong> the Sharpe ratio compares the return of an investment with its risk</p>
+            </div>
+          </div>
+          <div class="easy-pie-chart" data-percent="{{ context.percentage[1] }}">
+            <span class="show center">{{ '%0.2f'| format(context.trades_net|float) }}%</span>
+            <div class="hide info modal">
+              <h3>Expectancy</h3>
+              <p><strong>Circle:</strong> expectancy compared to backetest results</p>
+              <p><strong>Description:</strong> it's the average return of a trade</p>
+            </div>
+          </div>
+          <div class="easy-pie-chart" data-percent="{{ context.percentage[2] }}">
+            <span class="show center">{{ '%0.2f'| format(context.earnings[-1].earning|float) }}%</span>
+            <div class="hide info modal">
+              <h3>Rate of Return</h3>
+              <p><strong>Circle:</strong> current month rate of return compared to strategy's average rate of return</p>
+              <p><strong>Description:</strong> it's the net gain or loss of an investment over a specified time period</p>
+            </div>
+          </div>
+          <div class="easy-pie-chart" data-percent="{{ context.percentage[3] }}">
+            <span class="show center">{{ '%0.2f'| format(context.performance.winrate|float) }}%</span>
+            <div class="hide info modal">
+              <h3>Winrate</h3>
+              <p><strong>Circle:</strong> sharpe ratio compared to backetest results</p>
+              <p><strong>Description:</strong> it's the amount of successful trades that were generated over a certain period</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="strategy-description-container" class="row">
+        <div id="strategy-description" class="column panel left">
+          <div class="vlist">
+            <p class="vitem secondary-info">Strategy trading type: {{ context.type }}</p>
+            <p class="vitem">{{ context.description }}</p>
+            <p class="vitem secondary-info">Default leverage: {{ context.leverage }}x</p>
+            {% if context.minimum_budget_required > 0 %}
+              <p class="vitem secondary-info">Minimum budget required: ${{ context.minimum_budget_required + 1 }}</p>
+            {% endif %}
+            <p class="vitem secondary-info">
+              Strategy created: {{ context.created }}
+              {% if context.updated %}
+                Strategy updated: {{ context.updated }}
+              {% endif %}
+            </p>
+          </div>
+          <div class="modal panel-about">
+            <div class="header">
+              <h2>Tutorial: Description Panel</h2>
+              <button class="close"  aria-label="Close Tutorial: Description Panel">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="body">
+              <p>
+                This is a brief description of the strategy: the general concept behind it as well as its macro type (scalping, intra-day, swing, etc.)
+              </p>
+              <button class="iberu-button next-btn" aria-label="Next to Tutorial: Buy Panel">NEXT<span class="visually-hidden">to Tutorial: Buy Panel</span></button>
+            </div>
+          </div>
+        </div>
+        <div id="strategy-buy" class="column panel right">
+          <form class="vlist" id="buy-form">
+            <label for="conditions" class="vitem">
+              <input type="checkbox" name="terms-conditions" id="conditions"> Yes, I accept the terms and conditions
+            </label>
+            <label for="auto-renewal" class="vitem">
+              <input type="checkbox" name="auto-renewal" id="auto-renewal"> Automatic renewal
+            </label>
+            {% if context.price == 0 %}
+            <button class="iberu-button big disabled vitem" form="buy-form" id="buy-button" type="submit" disabled> 
+              <span class="show big">Free</span>
+              <span class="hide">You have to accept the terms and condition before proceeding</span>
+            </button>
+            {% else %}
+            <button class="iberu-button big disabled vitem" form="buy-form" id="buy-button" type="submit" disabled>
+              <span class="show big">${{ '%0.2f'| format(context.price|float) }}</span>
+              <span class="hide">You have to accept the terms and condition before proceeding</span>
+            </button>
+            {% endif %}
+          </form>
+          <div class="modal panel-about">
+            <div class="header">
+              <h2>Tutorial: Buy Panel</h2>
+              <button class="close"  aria-label="Close Tutorial: Buy Panel">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="body">
+              <p>
+                Unlock the strategy here
+              </p>
+              <button class="iberu-button next-btn" aria-label="Next to Tutorial: Performance Panel">NEXT<span class="visually-hidden">to Tutorial: Performance Panel</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="strategy-performance" class="column panel">
+          {% if current_user.username %}
+            <lightweight-performance-chart id="line-chart" data-strategy="{{ strategy }}" data-user="{{ current_user.username }}" 
+            data-market="{{ context.market }}" data-indicators="{{ context.indicators }}">  
+            </lightweight-performance-chart>
+          {% else %}
+            <lightweight-performance-chart id="line-chart" data-strategy="{{ strategy }}"
+            data-market="{{ context.market }}" data-indicators="{{ context.indicators }}">  
+            </lightweight-performance-chart>
+          {% endif %}
+          <div class="modal panel-about">
+            <div class="header">
+              <h2>Tutorial: Performance Panel</h2>
+              <button class="close"  aria-label="Close Tutorial: Performance Panel">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="body">
+              <p>
+                This is the <strong>buy and hold vs strategy</strong> chart. It shows the gain/loss you would have had holding the asset (green/red baseline) compared to investing the same amount of money into the strategy
+              </p>
+              <button class="iberu-button next-btn" aria-label="Next to Tutorial: Candlestick Panel">NEXT<span class="visually-hidden">to Tutorial: Candlestick Panel</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="strategy-chart-container" class="row">
+        <div id="strategy-chart" class="column panel left">
+          {% if current_user.username %}
+            <lightweight-chart-container id="chart" data-strategy="{{ strategy }}" data-user="{{ current_user.username }}"
+              data-market="{{ context.symbol }}" data-indicators="{{ context.indicators }}">
+            </lightweight-chart-container>
+          {% else %}
+            <lightweight-chart-container id="chart" data-strategy="{{ strategy }}" 
+              data-market="{{ context.symbol }}" data-indicators="{{ context.indicators }}">
+            </lightweight-chart-container>
+          {% endif %}
+          <div class="modal panel-about">
+            <div class="header">
+              <h2>Tutorial: Candlestick Panel</h2>
+              <button class="close"  aria-label="Close Tutorial: Candlestick Panel">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="body">
+              <p>
+                This is a classic <abbr>OHLC</abbr>(Open High Low Close) candlesticks chart where you can check the trading asset. You can also view the closed trades here (access them on the right-hand side panel).
+              </p>
+              <button class="iberu-button next-btn" aria-label="Next to Tutorial: Earnings Panel">NEXT<span class="visually-hidden">to Tutorial: Earnings Panel</span></button>
+            </div>
+          </div>
+        </div>
+        <div id="strategy-earning" class="column panel right">    
+          <div id="earning" class="vlist">
+            <div class="vitem hlist">
+              <span class="hitem">Month</span>
+              <span class="hitem">%</span>
+              <span class="hitem">WR%</span>
+              <span class="hitem">L | S</span>
+              <span class="hitem">Trades</span>
+            </div>
+            {% for mse in context.earnings %}
+              <div class="vitem hlist" id="dropdown-monthly-performance-{{mse.id}}">
+                <span class="hitem">{{mse.startPeriod.strftime('%m')|abbr_month_name}}</span>
+                {% if mse.earning >= 0 %}
+                  <span class="hitem positive">{{ '%0.2f'| format(mse.earning|float) }}</span>
+                {% else %}
+                  <span class="hitem negative">{{ '%0.2f'| format(mse.earning|float) }}</span>
+                {% endif %}
+                <span class="hitem">{{mse.winrate}}</span>
+                <span class="hitem">{{mse.longTrades}} | {{mse.trades|length - mse.longTrades}}</span>
+                <button class="hitem dropdown-button" data-id={{mse.id}} data-startPeriod={{mse.startPeriod.timestamp()}} aria-label="{{ mse.startPeriod.strftime('%m')|month_name }} trades">
+                  <span class="visually-hidden">{{mse.startPeriod.strftime('%m')|month_name}} trades</span>
+                  <i class="fa-solid fa-angle-down"></i>
+                  <i class="fa-solid fa-angle-up hide"></i>
+                  <span class="loader hide"></span>
+                </button>
+              </div>
+              <div class="vlist hide" id="dropdown-monthly-performance-{{mse.id}}-trades">
+                <div class="vitem hlist">
+                  <span class="hitem narrow">Open</span>
+                  <span class="hitem narrow">Close</span>
+                  <span class="hitem large">Duration</span>
+                  <span class="hitem narrow">P</span>
+                  <span class="hitem">%</span>
+                  <span class="hitem narrow">Chart</span>
+                </div>   
+                {% for trade in mse.trades %}
+                  <div class="vitem hlist">
+                    <span class="hitem narrow">
+                      {{trade.startDate.strftime('%d')}}
+                    </span>
+                    <span class="hitem narrow">
+                      {{trade.endDate.strftime('%d')}}
+                    </span>
+                    <span class="hitem large">
+                      {{trade.endDate - trade.startDate}}
+                    </span>
+                    <span class="hitem narrow">
+                      {% if trade.position == True %}
+                        L
+                      {% else %}
+                        S
+                      {% endif %}
+                    </span>
+                    {% if trade.result >= 0 %}
+                      <span class="hitem positive">
+                        {{trade.result}}
+                      </span>
+                    {% else %}
+                      <span class="hitem negative">
+                        {{trade.result}}
+                      </span>
+                    {% endif %}
+                      <button class="hitem narrow iberu-button small" data-startDate="{{ trade.startDate.timestamp() }}" data-endDate="{{ trade.endDate.timestamp() }}" 
+                      aria-label="show {{ trade.startDate }} {{ trade.endDate }} trade in chart">
+                        <span class="visually-hidden">show {{ trade.startDate }} {{ trade.endDate }} trade in chart</span>
+                        <i class="fa-solid fa-chart-line"></i>
+                      </button>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          </div>
+          <div class="modal panel-about">
+            <div class="header">
+              <h2>Tutorial: Earnings Panel</h2>
+              <button class="close"  aria-label="Close Tutorial: Earnings Panel">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="body">
+              <p>
+                This section is intended for reviewing any trade executed by the strategy. Clicking on the drop-down menu will display all trades executed in that month. Click on a specific trade to see exactly how it played out.
+              </p>
+              <button class="iberu-button next-btn" aria-label="Next to Tutorial: Info Panel">NEXT<span class="visually-hidden">to Tutorial: Info Panel</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="strategy-wrapper-container" class="row">
+        <div id="strategy-backtest" class="column panel left">      
+          <button class="filter" aria-label="Parameter filter">
+            <i class="fa-solid fa-filter"></i>
+          </button>
+          <div class="modal" id="info-modal">
+            <div class="header">
+              <h2>Filter</h2>
+              <button class="close" aria-label="Close info modal">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <form class="body">
+              <label for="start-period">Start period:
+                <input type="date" id="start-period" name="start-period">
+              </label>
+              <label for="end-period">End period:
+                <input type="date" id="end-period" name="end-period">
+              </label>
+              <button id="filter-confirm" class="iberu-button medium submit" type="submit">Confirm</button>
+            </form>
+          </div>
+          <table id="backtest-table" aria-describedby="backtest-table-description">
+            <caption>
+              Backtest performance vs Actual performance
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Params</th>
+                <th scope="col">Backtest</th>
+                <th scope="col">Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="rate-of-return">
+                <th scope="row">RoR</th>
+                {% if context.performance.rate_of_return >= context.backtest.rate_of_return %}
+                  <td>{{ context.backtest.rate_of_return }}</td>
+                  <td class="positive">{{ context.performance.rate_of_return }}</td>
+                {% else %}
+                  <td class="positive">{{ context.backtest.rate_of_return }}</td>
+                  <td>{{ context.performance.rate_of_return }}</td>
+                {% endif %}
+              </tr>
+              <tr id="gross-profit">
+                <th scope="row">Gross Profit</th>
+                {% if context.performance.frequency >= context.backtest.frequency %}
+                  <td>{{ context.backtest.frequency }}</td>
+                  <td class="positive">{{ context.performance.frequency }}</td>
+                {% else %}
+                  <td class="positive">{{ context.backtest.frequency }}</td>
+                  <td>{{ context.performance.frequency }}</td>
+                {% endif %}
+              </tr>
+              <tr id="profit-factor" class="spaced">
+                <th scope="row">Profit Factor</th>
+                {% if context.performance.time_range >= 1 %}
+                  <td> - </td>
+                  <td class="positive">{{ context.performance.time_range }}</td>
+                {% else %}
+                  <td class="positive"> - </td>
+                  <td>{{ context.performance.time_range }}</td>
+                {% endif %}
+              </tr>
+              <tr id="total-trades">
+                <th scope="row">Total trades</th>
+                {% if context.performance.holding_period >= context.backtest.holding_period %}
+                  <td>{{ context.backtest.holding_period }}</td>
+                  <td class="positive">{{ context.performance.holding_period }}</td>
+                {% else %}
+                  <td class="positive">{{ context.backtest.holding_period }}</td>
+                  <td>{{ context.performance.holding_period }}</td>
+                {% endif %}
+              </tr>
+              <tr id="winrate">
+                <th scope="row">WR%</th>
+                {% if context.performance.winrate >= context.backtest.winrate %}
+                  <td>{{ context.backtest.winrate }}%</td>
+                  <td class="positive">{{ '%0.2f'| format(context.performance.winrate|float) }}%</td>
+                {% else %}
+                  <td class="positive">{{ context.backtest.winrate }}%</td>
+                  <td>{{ '%0.2f'| format(context.performance.winrate|float) }}%</td>
+                {% endif %}
+              </tr>
+              <tr id="avg-net-profit">
+                <th scope="row">Avg Trade Net Profit</th>
+                {% if context.backtest_net > context.trades_net %}
+                  <td class="positive">{{ context.backtest_net }}</td>
+                  <td>{{ context.trades_net }}</td>
+                {% else %}
+                  <td>{{ context.backtest_net }}</td>
+                  <td class="positive">{{ context.trades_net }}</td>
+                {% endif %}
+              </tr>
+              <tr id="avg-win">
+                <th scope="row">Avg Win Trade</th>
+                <td> - </td>
+                {% if context.win_net > 0 %}
+                  <td class="positive">{{ context.win_net }}</td>
+                {% else %}
+                  <td>{{ context.win_net }}</td>
+                {% endif %}
+              </tr>
+              <tr id="avg-lose">
+                <th scope="row">Avg Lose Trade</th>
+                <td> - </td>
+                {% if context.loss_net > 0 %}
+                  <td class="positive">{{ context.loss_net }}</td>
+                {% else %}
+                  <td>{{ context.loss_net }}</td>
+                {% endif %}
+              </tr>
+              <tr id="avg-win-lose" class="spaced">
+                <th scope="row">Avg W : Avg L</th>
+                <td> - </td>
+                {% if context.win_net >= context.loss_net %}
+                  <td class="positive">{{ (context.win_net / -(context.loss_net))|round(2) if context.loss_net else 0}}</td>
+                {% else %}
+                  <td>{{ (context.win_net / -(context.loss_net))|round(2) }}</td>
+                {% endif %}
+              </tr>
+              <tr id="max-shares">
+                <th scope="row">Max shares</th>
+                <td>1</td>
+                <td>1</td>
+              </tr>
+              <tr id="maximum-drawdown">
+                <th scope="row">Maximum drawdown</th>
+                {% if context.performance.maximum_drawdown >= context.backtest.maximum_drawdown %}
+                  <td class="positive">{{ context.backtest.maximum_drawdown }}</td>
+                  <td>{{ context.performance.maximum_drawdown }}</td>
+                {% else %}
+                  <td>{{ context.backtest.maximum_drawdown }}</td>
+                  <td>{{ context.performance.maximum_drawdown }}</td>
+                {% endif %}
+              </tr>
+              <tr id="sharpe-ratio" class="spaced">
+                <th scope="row">Sharpe Ratio</th>
+                {% if context.performance.sharpe_ratio >= context.backtest.sharpe_ratio %}
+                  <td>{{ context.backtest.sharpe_ratio }}</td>
+                  <td class="positive">{{ context.performance.sharpe_ratio }}</td>
+                {% else %}
+                  <td class="positive">{{ context.backtest.sharpe_ratio }}</td>
+                  <td>{{ context.performance.sharpe_ratio }}</td>
+                {% endif %}
+              </tr>
+              <tr id="period">
+                <th scope="row">Trading Period</th>
+                <td>365 days</td>
+                <td>{{ (context.duration_timestamp / 86400)|int }} days</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="visually-hidden" id="backtest-table-description">
+            This table gives the user the backtesting summary as well as the actual performance summary, with a wide range of parameters and metrics
+          </p>
+          <div class="modal panel-about">
+            <div class="modal-header">
+              <h2>Tutorial: Info Panel</h2>
+              <button class="close"  aria-label="Close Tutorial: Info Panel">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>
+                This section shows the backtesting summary as well as the performance summary, with a wide range of parameters and metrics. Backtesting refers on past data while performance is related to live data.
+              </p>
+              <button class="iberu-button next-btn" aria-label="Next to Tutorial: Trades Panel">NEXT<span class="visually-hidden">to Tutorial: Trades Panel</span></button>
+            </div>
+          </div>
+        </div>
+        <div id="strategy-wrapper">
+          <div id="strategy-trade-distribution" class="row column panel">
+            <h2>Trades profit distribution</h2>
+            <canvas id="trade-distribution"></canvas>
+            <div class="no-trade hide">
+              <h3>{{ context.strategy }} Strategy has not closed any trade yet</h3>
+            </div>
+          </div>
+          <div id="strategy-time-distribution" class="row column panel">
+            <h2>Trades distribution</h2>
+            <canvas id="time-distribution"></canvas>
+            <div class="no-trade hide">
+              <h3>{{ context.strategy }} Strategy has not closed any trade yet</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="strategy-position" class="column panel">         
+          <table id="position-table" aria-labelledby="position-table-description">
+            <caption>
+              Long Trades performance vs Short Trades performance
+            </caption>
+            <thead>
+              <tr>
+                <th>Position</th>
+                <th>Total Trades</th>
+                <th>Avg Trade Net Profit</th>
+                <th>Avg Win Trade</th>
+                <th>Avg Lose Trade</th>
+                <th>Avg W : Avg L</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>Long</th>
+                <td data-label="Total trades">{{ context.total_long }}</td>
+                {% if context.long_net > context.short_net %}
+                  <td data-label="Avg Trade Net Profit"><span class="positive">{{ '%0.2f'| format(context.long_net|float) }}%</span></td>
+                {% else %}
+                  <td data-label="Avg Trade Net Profit">{{ '%0.2f'| format(context.long_net|float) }}%</td>
+                {% endif %}
+                {% if context.long_win > context.short_win %}
+                  <td data-label="Avg Win Trade"><span class="positive">{{ '%0.2f'| format(context.long_win|float) }}%</span></td>
+                {% else %}
+                  <td data-label="Avg Win Trade">{{ '%0.2f'| format(context.long_win|float) }}%</td>
+                {% endif %}
+                {% if context.long_loss > context.short_loss %}
+                  <td data-label="Avg Lose Trade"><span class="positive">{{ '%0.2f'| format(context.long_loss|float) }}%</span></td>
+                {% else %}
+                  <td data-label="Avg Lose Trade">{{ '%0.2f'| format(context.long_loss|float) }}%</td>
+                {% endif %}
+                {% if context.long_ratio > context.short_ratio %}
+                  <td data-label="Avg W : Avg L"><span class="positive">{{ '%0.1f'| format(context.long_ratio|float) }}</span></td>
+                {% else %}
+                  <td data-label="Avg W : Avg L">{{ '%0.1f'| format(context.long_ratio|float) }}</td>
+                {% endif %}
+              </tr>
+              <tr>
+                <th>Short</th>
+                <td data-label="Total trades">{{ context.total_short }}</td>
+                {% if context.short_net > context.long_net %}
+                  <td data-label="Avg Trade Net Profit"><span class="positive">{{ '%0.2f'| format(context.short_net|float) }}%</span></td>
+                {% else %}
+                  <td data-label="Avg Trade Net Profit">{{ '%0.2f'| format(context.short_net|float) }}%</td>
+                {% endif %}
+                {% if context.short_win > context.long_win %}
+                  <td data-label="Avg Win Trade"><span class="positive">{{ '%0.2f'| format(context.short_win|float) }}%</span></td>
+                {% else %}
+                  <td data-label="Avg Win Trade">{{ '%0.2f'| format(context.short_win|float) }}%</td>
+                {% endif %}
+                {% if context.short_loss > context.long_loss %}
+                  <td data-label="Avg Lose Trade"><span class="positive">{{ '%0.2f'| format(context.short_loss|float) }}%</span></td>
+                {% else %}
+                  <td data-label="Avg Lose Trade">{{ '%0.2f'| format(context.short_loss|float) }}%</td>
+                {% endif %}
+                {% if context.short_ratio > context.long_ratio %}
+                  <td data-label="Avg W : Avg L"><span class="positive">{{ '%0.1f'| format(context.short_ratio|float) }}</span></td>
+                {% else %}
+                  <td data-label="Avg W : Avg L">{{ '%0.1f'| format(context.short_ratio|float) }}</td>
+                {% endif %}
+              </tr>
+            </tbody>
+          </table>
+          <p class="visually-hidden" id="position-table-description">
+            This table gives the user important information about the balance between long and short trades by showing the general performance of both positions
+          </p>
+          <div class="modal panel-about">
+            <div class="modal-header">
+              <h2>Tutorial: Trades Panel</h2>
+              <button class="close"  aria-label="Close Tutorial: Trades Panel">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>
+                Long trades vs short trades comparison
+              </p>
+              <button class="iberu-button next-btn" aria-label="Next to Tutorial: Generic Panel">NEXT<span class="visually-hidden">to Tutorial: Generic Panel</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+    
+    <footer>
+      <div class="hlist spaced">
+        <div class="hitem logo">
+          <a href="{{ url_for('main.index') }}">
+            <img src="/static/img/logo.png" alt="Iberu Trading Strategies logo">
+          </a>
+        </div>
+        <div class="hlist">
+          <a href="https://www.facebook.com" class="hitem"><i class="fa-brands fa-facebook-f"></i>  Facebook</a>
+          <a href="https://www.twitter.com" class="hitem"><i class="fa-brands fa-twitter"></i>  Twitter</a>
+          <a href="https://www.discord.com" class="hitem"><i class="fa-brands fa-discord"></i>  Discord</a>
+          <a href="https://web.telegram.org/z/" class="hitem"><i class="fa-brands fa-telegram"></i>  Telegram</a>
+        </div>
+      </div>
+      <span>Copyright © 2023, Iberu-TS. All Rights Reserved</span>
+    </footer>
+  </body>
+</html>
