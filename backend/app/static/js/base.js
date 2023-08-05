@@ -245,6 +245,24 @@ if (scalpingBtn) {
 
 const userSubscriptionContainer = document.querySelector("#user-subscription-container");
 if (userSubscriptionContainer) {
+  const status = document.querySelectorAll(".status");
+  status.forEach((el) => {
+    el.addEventListener('click', () => {
+      const italic = el.querySelector('i');
+      el.classList.toggle('positive');
+      el.classList.toggle('alert');
+      italic.classList.toggle('positive');
+      italic.classList.toggle('alert');
+      if (el.classList.contains('positive')) {
+        el.dataset.value = true;
+        el.innerHTML = '<i class="fa-solid fa-circle positive"></i> Active';
+      }
+      else {
+        el.dataset.value = false;
+        el.innerHTML = '<i class="fa-solid fa-circle alert"></i> Stop';
+      }
+    });
+  });
   const quotes = document.querySelectorAll(".quote");
   quotes.forEach((el) => {
     el.addEventListener('click', () => {
@@ -255,22 +273,35 @@ if (userSubscriptionContainer) {
       currentSubscription.classList.remove('show');
     });
   });
-  const userCurrentQuotes = userSubscriptionContainer.querySelectorAll(".dropdown");
-  userCurrentQuotes.forEach((el) => {
-    const quotesContainer = el.querySelector('.info.modal');
+  const apis = document.querySelectorAll(".api");
+  apis.forEach((el) => {
     el.addEventListener('click', () => {
-      quotesContainer.classList.contains('show') ? quotesContainer.classList.remove('show') : quotesContainer.classList.add('show');
+      const currentApi = el.parentNode.parentNode.parentNode;
+      currentApi.dataset.value = el.dataset.value;
+      currentApi.querySelector('button').innerText = el.dataset.value;
+      currentApi.classList.remove('show');
+    });
+  });
+  const userCurrent = userSubscriptionContainer.querySelectorAll(".dropdown");
+  userCurrent.forEach((el) => {
+    const modal = el.querySelector('.info.modal');
+    el.addEventListener('click', () => {
+      modal.classList.contains('show') ? modal.classList.remove('show') : modal.classList.add('show');
     });
   });
 
+  const strategiesSubscription = userSubscriptionContainer.querySelectorAll(".subscription");
   const confirmBtn = userSubscriptionContainer.querySelector('#subscription-confirm');
   confirmBtn.addEventListener('click', async() => {
     let subscriptions = new Array();
-    userCurrentQuotes.forEach((el) => {
-      const row = el.parentNode.querySelectorAll('td');
+    strategiesSubscription.forEach((el) => {
+      const row = el.querySelectorAll('td');
       subscriptions.push({strategy: row[0].textContent,
-                          leverage: row[4].querySelector('input').value ? row[4].querySelector('input').value : null,
-                          quote: row[6].querySelector('img').dataset.value ? row[6].querySelector('img').dataset.value : null,});
+                          status: row[3].querySelector('button').dataset.value ? row[3].querySelector('button').dataset.value : null,
+                          capital: row[4].querySelector('input').value ? row[4].querySelector('input').value : null,
+                          leverage: row[5].querySelector('input').value ? row[5].querySelector('input').value : null,
+                          quote: row[7].querySelector('img').dataset.value ? row[7].querySelector('img').dataset.value : null,
+                          api: row[8].dataset.value ? row[8].dataset.value : null,});
     });
     const token = await refreshTokenApi();
     if (!token) return;
@@ -302,9 +333,9 @@ if (dropzone){
 }
 
 
-const removeBtn = document.querySelector('#user-remove-picture');
-if (removeBtn) {
-  removeBtn.addEventListener('click', async() => {
+const removePictureBtn = document.querySelector('#user-remove-picture');
+if (removePictureBtn) {
+  removePictureBtn.addEventListener('click', async() => {
     const serverResponse = await fetch(`${window.origin}/delete_avatar`, {
       method: 'POST',
       credentials: 'include',
@@ -316,37 +347,88 @@ if (removeBtn) {
     location.reload(true);
   })
 }
+
+
+const userApiContainer = document.querySelector('#user-api-container');
+const removeApiBtn = userApiContainer.querySelectorAll('.fa-trash-can');
+if (removeApiBtn) {
+  removeApiBtn.forEach((el) => {
+    el.addEventListener('click', async() => {
+      const token = await refreshTokenApi();
+      if (!token) return;
+      const btn = el.parentNode;
+      const serverResponse = await fetch(`${window.origin}/api/user/delete_api`, {
+        method: 'POST',
+        credentials: 'include',
+        body: JSON.stringify({api: btn.dataset.value}),
+        cache: 'no-cache',
+        headers: new Headers({
+          'authorization': `bearer ${token}`,
+          'content-type': 'application/json'
+        })
+      });
+      const table = btn.parentNode.parentNode.parentNode;
+      table.removeChild(btn.parentNode.parentNode);
+    });
+  });
+}
+
+
+const logOutBtn = document.querySelector('#logout');
+if (logOutBtn) {
+  logOutBtn.addEventListener('click', async() => {
+    window.location.href = `${window.location.origin}/auth/logout`;
+  })
+}
 ///////////////////////SCRITTO MALE
-const userOverviewPage = document.querySelector('#user-overview-container') || undefined;
-const userOverviewButton = document.querySelector('#overview') || undefined;
-const userSubscriptionPage = document.querySelector('#user-subscription-container') || undefined;
-const userSubscriptionButton = document.querySelector('#subscription') || undefined;
-const userSettingsPage = document.querySelector('#user-settings-container') || undefined;
-const userSettingsButton = document.querySelector('#settings') || undefined;
+const userOverviewPage = document.querySelector('#user-overview-container');
+const userOverviewButton = document.querySelector('#overview');
+const userSubscriptionPage = document.querySelector('#user-subscription-container');
+const userSubscriptionButton = document.querySelector('#subscription');
+const userSettingsPage = document.querySelector('#user-settings-container');
+const userSettingsButton = document.querySelector('#settings');
+const userApiPage = document.querySelector('#user-api-container');
+const userApiButton = document.querySelector('#api');
 
 if (userOverviewButton) {
   userOverviewButton.addEventListener('click', () => {
     userOverviewPage.classList.remove('hide');
     userSubscriptionPage.classList.add('hide');
     userSettingsPage.classList.add('hide');
+    userApiPage.classList.add('hide');
     userOverviewButton.classList.add('current');
     userSubscriptionButton.classList.remove('current');
     userSettingsButton.classList.remove('current');
+    userApiButton.classList.remove('current');
   });
   userSubscriptionButton.addEventListener('click', () => {
     userSubscriptionPage.classList.remove('hide');
     userOverviewPage.classList.add('hide');
     userSettingsPage.classList.add('hide');
+    userApiPage.classList.add('hide');
     userSubscriptionButton.classList.add('current');
     userOverviewButton.classList.remove('current');
     userSettingsButton.classList.remove('current');
+    userApiButton.classList.remove('current');
   });
   userSettingsButton.addEventListener('click', () => {
     userSettingsPage.classList.remove('hide');
     userSubscriptionPage.classList.add('hide');
     userOverviewPage.classList.add('hide');
+    userApiPage.classList.add('hide');
     userSettingsButton.classList.add('current');
     userOverviewButton.classList.remove('current');
     userSubscriptionButton.classList.remove('current');
+    userApiButton.classList.remove('current');
+  });
+  userApiButton.addEventListener('click', () => {
+    userApiPage.classList.remove('hide');
+    userSubscriptionPage.classList.add('hide');
+    userOverviewPage.classList.add('hide');
+    userSettingsPage.classList.add('hide');
+    userApiButton.classList.add('current');
+    userOverviewButton.classList.remove('current');
+    userSubscriptionButton.classList.remove('current');
+    userSettingsButton.classList.remove('current');
   });
 }

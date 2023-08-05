@@ -11,14 +11,16 @@ class Config(object):
   PASSWORD = os.environ.get('PASSWORD')
   DATABASE = os.environ.get('DATABASE')
   SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+  API_KEY = os.environ.get('API_KEY').encode('utf-8')
+  API_SECRET = os.environ.get('API_SECRET').encode('utf-8')
   SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
       'sqlite:///' + os.path.join(basedir, 'app.db')
   SQLALCHEMY_TRACK_MODIFICATIONS = False
   MAIL_SERVER = os.environ.get('MAIL_SERVER')
-  MAIL_PORT = int(os.environ.get('MAIL_PORT'))
-  MAIL_USE_TLS = bool(os.environ.get('MAIL_USE_TLS'))
+  MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
+  MAIL_USE_TLS = False if os.environ.get('MAIL_USE_TLS') == 'False' else True
   MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-  MAIL_PASSWORD = os.environ.get('SENDGRID_API_KEY')
+  MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
   MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
   ADMINS = ['fabb.riccardo@gmail.com']
   LANGUAGES = ['en']

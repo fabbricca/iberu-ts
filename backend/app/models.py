@@ -14,7 +14,9 @@ from datetime import datetime
 from time import time
 
 from werkzeug.security import generate_password_hash, check_password_hash
+from cryptography.fernet import Fernet
 from hashlib import md5
+import base64
 
 import secrets
 
@@ -106,9 +108,8 @@ class User(UserMixin, db.Model):
     
     def get_reset_password_token(self, expires_in=600):
       return jwt.encode(
-          {"reset_password": self.username, "exp": time() + expires_in},
+          {"reset_password": self.id, "exp": time() + expires_in},
           current_app.config["SECRET_KEY"], algorithm="HS256")
-
 
     @staticmethod
     def verify_reset_password_token(token):
@@ -161,12 +162,33 @@ class Admin(User, db.Model):
 class Api(db.Model):
   __tablename__ = "api"
   id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(64))
+  name = db.Column(db.String(10))
   api_key_hash = db.Column(db.String(256))
   api_secret_hash = db.Column(db.String(256))
   user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
   exchange_id = db.Column(db.Integer, db.ForeignKey("exchange.id"))
   exchange = db.relationship("Exchange")
+
+  def __json__(self, exchange = False, **kwargs):
+    dictionary = {}
+    k = current_app.config['API_KEY']
+    api_key_cipher = Fernet(k)
+    if exchange:
+      dictionary.update({"exchange": Exchange.query.filter(Exchange.id==self.exchange_id).first().__json__()})
+    if not kwargs:
+      dictionary.update(vars(self))
+      dictionary['api_key_hash'] = api_key_cipher.decrypt(self.api_key_hash.encode('utf-8')).decode()
+      dictionary.__delitem__('_sa_instance_state')
+      return dictionary
+    for k in range(len(kwargs)):
+      try:
+        if list(kwargs.keys())[k] == 'api_key_hash':
+          dictionary[list(kwargs.keys())[k]] = api_key_cipher.decrypt(self.api_key_hash.encode('utf-8')).decode()
+        dictionary[list(kwargs.keys())[k]] = self.__getattribute__(list(kwargs.values())[k])
+      except:
+        pass
+    dictionary.__delitem__('_sa_instance_state')
+    return dictionary
 
 
 class Performance(object):
@@ -404,11 +426,13 @@ class Subscription(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   subscription_timestamp = db.Column(db.Integer, default=datetime.now().timestamp())
   unsubscription_timestamp = db.Column(db.Integer, nullable=True)
+  active = db.Column(db.Boolean, default=True)
   auto_renewal = db.Column(db.Boolean, default=False)
   preferred_leverage = db.Column(db.Integer, default=1)
   color = db.Column(db.String(10))
+  capital = db.Column(db.Integer)
   quote_id = db.Column(db.Integer, db.ForeignKey("asset.id"))
-  api_id = db.Column(db.Integer, db.ForeignKey("api.id"))
+  api_id = db.Column(db.Integer, db.ForeignKey("api.id"), nullable=True)
   transaction_id = db.Column(db.Integer, db.ForeignKey("transaction.id"))
 
   def set_auto_renewal(self, value) -> bool:
@@ -542,6 +566,20 @@ class Exchange(db.Model):
   future_taker = db.Column(db.Float, default=0.1)
   future_maker = db.Column(db.Float, default=0.1)
   country = db.relationship("CountryExchange", back_populates="exchange")
+
+  def __json__(self, **kwargs):
+    dictionary = {}
+    if not kwargs:
+      dictionary.update(vars(self))
+      dictionary.__delitem__('_sa_instance_state')
+      return dictionary
+    for k in range(len(kwargs)):
+      try:
+        dictionary[list(kwargs.keys())[k]] = self.__getattribute__(list(kwargs.values())[k])
+      except:
+        pass
+    dictionary.__delitem__('_sa_instance_state')
+    return dictionary
 
 
 class Country(db.Model):

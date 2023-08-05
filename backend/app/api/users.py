@@ -1,6 +1,6 @@
 from app import db
 from app.api import bp
-from app.models import Indicator, Product, Subscription, Transaction, Asset
+from app.models import Indicator, Product, Subscription, Transaction, Asset, Api
 
 from .tokens import isAuth
 
@@ -74,21 +74,54 @@ def user_subscription():
     return jsonify({'result': False})
   data = request.get_json()
   for s in data:
-    if s['leverage'] or s['quote']:
-      try:
-        strategy = db.session.query(Product.id).filter(Product.name==s['strategy']).first()[0]
-        transaction = db.session.query(Transaction.id).filter((Transaction.user_id==current_user.id)
-                                                            &(Transaction.product_id==strategy)).order_by(Transaction.timestamp.desc()).first()[0]
-        subscription = Subscription.query.filter((Subscription.transaction_id==transaction)&(Subscription.unsubscription_timestamp>datetime.now().timestamp())).first()
-        if s['leverage']:
-          subscription.preferred_leverage = int(s['leverage']) if int(s['leverage']) < current_app.config['MAX_LEVERAGE'] else current_app.config['MAX_LEVERAGE']
+    try:
+      strategy = db.session.query(Product.id).filter(Product.name==s['strategy']).first()[0]
+      transaction = db.session.query(Transaction.id).filter((Transaction.user_id==current_user.id)
+                                                          &(Transaction.product_id==strategy)).order_by(Transaction.timestamp.desc()).first()[0]
+      subscription = Subscription.query.filter((Subscription.transaction_id==transaction)&(Subscription.unsubscription_timestamp>datetime.now().timestamp())).first()
+      if s['capital']:
+        subscription.capital = int(s['capital'])
+        db.session.commit()
+      if s['leverage']:
+        subscription.preferred_leverage = int(s['leverage']) if int(s['leverage']) < current_app.config['MAX_LEVERAGE'] else current_app.config['MAX_LEVERAGE']
+        db.session.commit()
+      if s['quote']:
+        quote = Asset.query.filter(Asset.name.ilike(s['quote'])).first()
+        if quote and quote.id != subscription.quote_id:
+          subscription.quote_id = quote.id
           db.session.commit()
-        if s['quote']:
-          quote = Asset.query.filter(Asset.name.ilike(s['quote'])).first()
-          subscription.quote_id = quote.id if quote else subscription.quote_id
+      if s['api']:
+        api = Api.query.filter(Api.name==s['api']).first()
+        if api and api.id != subscription.api_id:
+          subscription.api_id = api.id
           db.session.commit()
-      except:
-        pass
+      if s['status']:
+        if s['status'] == 'false':
+          subscription.active = False
+        elif s['status'] == 'true' and subscription.unsubscription_timestamp > datetime.now().timestamp() and subscription.api_id:
+          subscription.active = True
+        db.session.commit()
+    except:
+      pass
+  return jsonify({'result': True})
+
+
+
+
+@bp.route('/user/delete_api', methods=['POST'])
+def user_api():
+  if not isAuth(request):
+    return jsonify({'result': False})
+  data = request.get_json()
+  api = Api.query.filter((Api.name==data['api'])&(Api.user_id==current_user.id)).first()
+  if (api):
+    current_timestamp = datetime.now().timestamp()
+    active_subscription = text(f"""UPDATE subscription s
+                                    SET s.api_id = NULL, s.active = 0
+                                    WHERE s.api_id = {api.id} AND s.unsubscription_timestamp > {current_timestamp};""").compile()
+    db.engine.execute(active_subscription)
+    db.session.delete(api)
+    db.session.commit()
   return jsonify({'result': True})
 
 

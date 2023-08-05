@@ -106,7 +106,8 @@
           <button id="overview" class="vitem current">Overview</button>
           <button id="subscription" class="vitem">Subscription</button>
           <button id="settings" class="vitem">Settings</button>
-          <button class="vitem">API</button>
+          <button id="api" class="vitem">API</button>
+          <button id="logout" class="vitem">Log out</button>
         </div>
       </div>
 
@@ -115,16 +116,16 @@
         <div id="user-header-container" class="row panel">
           <img id="user-image" class="big" src="{{ url_for('main.retrieve_avatar') }}">
           <div id="user-info" class="vlist">
-            <h1 class="vitem">{{ current_user.username }}</h1>
+            <h2 class="vitem">{{ current_user.name }}</h2>
             <div class="vitem hlist">
-              <h2 class="secondary-info hitem">UserID</h2>
-              <h2 class="secondary-info hitem">User Type</h2>
-              <h2 class="secondary-info hitem">Referral code</h2>
+              <h3 class="secondary-info hitem">UserID</h3>
+              <h3 class="secondary-info hitem">User Type</h3>
+              <h3 class="secondary-info hitem">Referral code</h3>
             </div>
             <div class="vitem hlist">
-              <h2 class="secondary-info hitem">{{ current_user.id }}</h2>
-              <h2 class="secondary-info hitem">{{ current_user.type }}</h2>
-              <h2 class="secondary-info hitem">{{ context.referral_code }}</h2>
+              <h3 class="secondary-info hitem">{{ current_user.id }}</h3>
+              <h3 class="secondary-info hitem">{{ current_user.type }}</h3>
+              <h3 class="secondary-info hitem">{{ context.referral_code }}</h3>
             </div>
           </div>
           <div id="user-achievements">
@@ -145,10 +146,10 @@
         </div>
   
         <div class="row">
-
           <div id="user-portfolio-container" class="column">
+            <h1>Portfolio overview</h1>
             <div id="user-performance" class="row">
-              <h1>Estimated earnings</h1>
+              <h2>Estimated earnings</h2>
               <button id="portfolio-show-balance" class="iberu-button dark xsmall fa-solid fa-eye"></button>
               <button id="portfolio-hide-balance" class="iberu-button dark xsmall fa-solid fa-eye-slash"></button>
             </div>
@@ -163,7 +164,7 @@
             </div>
     
             <div id="user-strategies-container" class="row">
-              <h1>{{ current_user.name }}'s Strategies</h1>
+              <h2>{{ current_user.name }}'s Strategies</h2>
               <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
                 <caption class="visually-hidden">This table contains the top performing strategies in the last 30 days
                   ordered by the highest return. For each strategy are provided its trading type, winrate, performance(return) and the price.</caption>
@@ -226,7 +227,7 @@
 
           <div id="user-suggestions-container" class="column">
             <div id="user-suggestions" class="row">
-              <h1>Recommended For {{ current_user.name }}</h1>
+              <h2>Recommended For {{ current_user.name }}</h2>
               <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
                 <caption class="visually-hidden">This table contains the top performing strategies in the last 30 days
                   ordered by the highest return. For each strategy are provided its trading type, winrate, performance(return) and the price.</caption>
@@ -254,7 +255,7 @@
             </div>
 
             <div id="user-services" class="row vlist">
-              <h1 class="vitem">More Services</h1>
+              <h2 class="vitem">More Services</h2>
               <a href="{{ url_for('main.index') }}" class="vitem iberu-button dark medium">
                 <i class="fa-solid fa-comments fa-xl"></i>
                 <div class="vlist">
@@ -291,16 +292,16 @@
         <div id="user-header-container" class="row panel">
           <img id="user-image" class="big" src="{{ url_for('main.retrieve_avatar') }}">
           <div id="user-info" class="vlist">
-            <h1 class="vitem">{{ current_user.username }}</h1>
+            <h2 class="vitem">{{ current_user.name }}</h2>
             <div class="vitem hlist">
-              <h2 class="secondary-info hitem">Subscriptions</h2>
-              <h2 class="secondary-info hitem">Active</h2>
-              <h2 class="secondary-info hitem">Referral code</h2>
+              <h3 class="secondary-info hitem">Subscriptions</h3>
+              <h3 class="secondary-info hitem">Active</h3>
+              <h3 class="secondary-info hitem">Referral code</h3>
             </div>
             <div class="vitem hlist">
-              <h2 class="secondary-info hitem">{{ context.active_subscriptions|length + context.ended_subscriptions|length }}</h2>
-              <h2 class="secondary-info hitem">{{ context.active_subscriptions|length }}</h2>
-              <h2 class="secondary-info hitem">{{ context.referral_code }}</h2>
+              <h3 class="secondary-info hitem">{{ context.active_subscriptions|length + context.ended_subscriptions|length }}</h3>
+              <h3 class="secondary-info hitem">{{ context.active_subscriptions|length }}</h3>
+              <h3 class="secondary-info hitem">{{ context.referral_code }}</h3>
             </div>
           </div>
           <div id="user-achievements">
@@ -319,7 +320,7 @@
             </div>
           </div>
         </div>
-        <div class="external-container narrow">
+        <div class="external-container large">
           <h1>User subscriptions</h1>
           <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
             <caption class="visually-hidden">This table contains the user's last 20 subscription</caption>
@@ -329,18 +330,33 @@
                 <th scope="col">Start Period</th>
                 <th scope="col">End Period</th>
                 <th scope="col">Status</th>
+                <th scope="col">Capital</th>
                 <th scope="col">Leverage</th>
                 <th scope="col">Asset</th>
                 <th scope="col">Quote</th>
+                <th scope="col">API</th>
               </tr>
             </thead>
             <tbody>
               {% for s in context.active_subscriptions %}
-                <tr>
+                <tr class="subscription">
                   <td><a href="{{ url_for('main.ssearch') }}/{{ s.strategy.replace(' ', '%20') }}">{{ s.strategy }}</a></td>
                   <td>{{ s.start }}</td>
                   <td>{{ s.end }}</td>
-                  <td class="positive"><i class="fa-solid fa-circle positive"></i> Active</td>
+                  {% if s.active == True %}
+                    <td>
+                      <button class="status positive">
+                        <i class="fa-solid fa-circle positive"></i> Active
+                      </button>
+                    </td>
+                  {% else %}
+                    <td>
+                      <button class="status alert">
+                        <i class="fa-solid fa-circle alert"></i> Stop
+                      </button>
+                    </td>
+                  {% endif %}
+                  <td><input type="number" placeholder="{{ s.capital }}" data-value=""></td>
                   <td><input type="number" placeholder="{{ s.leverage }}" data-value=""></td>
                   <td>
                     <div class="hlist">
@@ -384,6 +400,20 @@
                       </div>
                     </div>
                   </td>
+                  <td class="dropdown">
+                    <button class="hitem big dropdown-button">
+                      {{ s.api }}
+                    </button>
+                    <div class="hide info modal">
+                      <div class="vlist">
+                        {% for a in context.api %}
+                          <button class="api vitem big" data-value="{{a.name}}">
+                            {{a.name}}
+                          </button>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </td>
                 </tr>
               {% endfor %}
               {% for s in context.ended_subscriptions %}
@@ -422,39 +452,79 @@
       </div>
 
       <div id="user-settings-container" class="external-container narrow hide">
-
-        <div id="user-personal-info">
-          <h1>Edit Profile</h1>
-          <div id="user-personal-image" class="vlist">
-            <h2 class="vitem">Profile</h2>
-            <div class="hlist">
-              <img id="user-image hitem" src="{{ url_for('main.retrieve_avatar') }}">
-              <div class="vlist hitem">
-                <form action="{{ url_for('main.upload_avatar') }}" class="dropzone iberu-button big vitem">
-                </form>
-                <button id="user-remove-picture" class="iberu-button big white negative vitem"><i class="fa-regular fa-trash-can fa-lg"></i>Remove picture</button>
+        <h1>Edit Profile</h1>
+        <div class="hlist">
+          <div id="user-profile-container" class="hitem">
+            <div id="user-personal-image" class="vlist">
+              <h2 class="vitem">Profile</h2>
+              <div class="hlist">
+                <img id="user-image hitem" src="{{ url_for('main.retrieve_avatar') }}">
+                <div class="vlist hitem">
+                  <form action="{{ url_for('main.upload_avatar') }}" class="dropzone iberu-button big vitem">
+                  </form>
+                  <button id="user-remove-picture" class="iberu-button big white negative vitem"><i class="fa-regular fa-trash-can fa-lg"></i>Remove picture</button>
+                </div>
               </div>
             </div>
+            <form id="user-profile-form" action="{{ url_for('main.user_edit') }}" method="post">
+                {{ profile_form.csrf_token(id="user-profile-token") }}
+                {{ profile_form.name.label }}
+                {{ profile_form.name(size=32, placeholder = current_user.name, autocomplete="off") }}
+                {{ profile_form.surname.label }}
+                {{ profile_form.surname(size=32, placeholder = current_user.surname, autocomplete="off") }}
+                {{ profile_form.phone.label }}
+                {{ profile_form.phone(size=32, placeholder = current_user.phone, autocomplete="off") }}
+                {{ profile_form.discord.label }}
+                {{ profile_form.discord(size=32, placeholder = current_user.discord, autocomplete="off") }}
+                {{ profile_form.submit(id="user-profile-submit", class="iberu-button medium submit") }}
+            </form>
           </div>
-          <form id="user-edit-profile" action="{{ url_for('main.user_edit') }}" method="post">
-              {{ form.hidden_tag() }}
-              {{ form.name.label }}
-              {{ form.name(size=32, placeholder = current_user.name, autocomplete="off") }}
-              {{ form.surname.label }}
-              {{ form.surname(size=32, placeholder = current_user.surname, autocomplete="off") }}
-              {{ form.phone.label }}
-              {{ form.phone(size=32, placeholder = current_user.phone, autocomplete="off") }}
-              {{ form.discord.label }}
-              {{ form.discord(size=32, placeholder = current_user.discord, autocomplete="off") }}
-              {{ form.submit(class="iberu-button medium submit") }}
+          <div id="user-advance-container" class="hitem vlist">
+            <h2 class="vitem">Settings</h2>
+            <h3 class="vitem">Change password</h3>
+            <form id="user-password-form" action="{{ url_for('auth.change_password_request') }}" method="post">
+              {{ password_form.csrf_token(id="user-password-token") }}
+              {{ password_form.email.label }}
+              {{ password_form.email(size=32, value = current_user.email, autocomplete="off") }}
+              {{ password_form.password.label }}
+              {{ password_form.password(size=32, autocomplete="off") }}
+              {{ password_form.submit(id="user-advance-submit", class="iberu-button medium submit") }}
           </form>
-          <h2 class="vitem">Settings</h2>
+          </div>
         </div>
+      </div>
 
-        <div id="user-creator-banner">
-          <img src="/static/img/creator.svg" alt="">
+      <div id="user-api-container" class="external-container narrow hide">
+        <div class="external-container narrow">
+          <h1>User APIs</h1>
+          <h2>Active APIs</h2>
+          <table class="strategies-table" aria-label="">
+            <caption class="visually-hidden">This table contains the user's last 20 subscription</caption>
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Api key</th>
+                <th scope="col">Exchange</th>
+                <th scope="col">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in context.api %}
+                <tr>
+                  <td>{{ a.name }}</td>
+                  <td>{{ a.api_key_hash }}</td>
+                  <td>{{ a.exchange.name }}</td>
+                  <td>
+                    <button class="negative" data-value="{{ a.name }}">
+                      <i class="fa-regular fa-trash-can fa-lg"></i>
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          
         </div>
-
       </div>
     
     </main>

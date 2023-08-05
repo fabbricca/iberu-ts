@@ -10,6 +10,7 @@
   --color-iberu: #419F89;
   --color-iberu-active: #317e67;
   --color-scrollbar-thumb: #7d7d7d;
+  --color-alert: #e6a519;
 }
 
 html {
@@ -273,6 +274,9 @@ lightweight-user-chart.loaded {
 .negative {
   color: var(--color-negative);
 }
+.alert {
+  color: var(--color-alert);
+}
 
 .visually-hidden {
   position: absolute;
@@ -414,7 +418,7 @@ lightweight-user-chart.loaded {
 .hlist .hitem {
   display: inline-block;
   margin: auto 10px auto 0;
-  text-align: center;
+  /*text-align: center;*/
 }
 .hlist .hitem i {
   padding: 0 10px 0 0;
@@ -1189,6 +1193,15 @@ footer span {
   flex: 1;
   background: var(--color-user-background);
 }
+#user-main h1 {
+  margin: 10px 0 30px 0;
+  font-size: 48px;
+  font-weight: 300;
+}
+#user-main h2 {
+  font-size: 24px;
+  font-weight: 400;
+}
 
 #user-navbar-container {
   display: block;
@@ -1228,14 +1241,14 @@ footer span {
   margin-top: 0;
   margin-bottom: 0;
 }
-#user-info h1 {
+#user-info h2 {
   width: 40%;
   margin-bottom: 10px;
   text-align: left;
   font-size: 20px;
   font-weight: 300;
 }
-#user-info h2 {
+#user-info h3 {
   text-align: left;
   font-weight: 200;
 }
@@ -1296,10 +1309,8 @@ footer span {
   width: 65%;
   margin: 50px 3% 0 30px;
 }
-#user-portfolio-container h1 {
+#user-performance h2 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 400;
 }
 #user-performance button {
   height: fit-content;
@@ -1334,7 +1345,7 @@ footer span {
   margin: 60px 0;
   flex-direction: column;
 }
-#user-strategies-container h1 {
+#user-strategies-container h2 {
   margin: 30px 0 15px 0;
 }
 
@@ -1360,18 +1371,16 @@ footer span {
 #user-suggestions-container {
   display: flex;
   flex-direction: column;
-  margin: 50px 0 0 0;
+  margin: 148px 0 0 0;
   width: 32%;
 }
 #user-suggestions {
   flex: 1;
   flex-direction: column;
 }
-#user-suggestions h1 {
+#user-suggestions h2 {
   margin: 0 auto;
   text-align: center;
-  font-size: 24px;
-  font-weight: 400;
 }
 #user-suggestions .strategies-table {
   margin: 20px 0 0 0;
@@ -1381,7 +1390,7 @@ footer span {
   width: 80%;
   margin: 0 10% 40px 10%;
 }
-#user-services h1 {
+#user-services h2 {
   margin: 0 auto 20px auto;
   text-align: center;
   font-size: 24px;
@@ -1422,28 +1431,25 @@ footer span {
   text-align: left;
 }
 
-#user-subscription-container .external-container h1 {
-  margin: 20px 0 40px 0;
-  font-size: 48px;
-  font-weight: 300;
-}
 #user-subscription-container .strategies-table {
   margin: 0 0 30px 0;
 }
 #user-subscription-container .strategies-table thead th:nth-child(1) {
-  width: 27%;
+  width: 20%;
   text-align: left;
 }
 #user-subscription-container .strategies-table thead th:nth-child(2),
-#user-subscription-container .strategies-table thead th:nth-child(3),
-#user-subscription-container .strategies-table thead th:nth-child(4) {
-  width: 16%;
+#user-subscription-container .strategies-table thead th:nth-child(3) {
+  width: 14%;
 }
+#user-subscription-container .strategies-table thead th:nth-child(4),
+#user-subscription-container .strategies-table thead th:nth-child(5),
 #user-subscription-container .strategies-table thead th:nth-child(6),
-#user-subscription-container .strategies-table thead th:nth-child(7) {
-  width: 7.5%;
+#user-subscription-container .strategies-table thead th:nth-child(8) {
+  width: 8%;
 }
-#user-subscription-container .strategies-table thead th:nth-child(5) {
+#user-subscription-container .strategies-table thead th:nth-child(7),
+#user-subscription-container .strategies-table thead th:nth-child(9) {
   width: 10%;
 }
 #user-subscription-container .strategies-table tbody td:nth-child(1) {
@@ -1501,21 +1507,24 @@ footer span {
 }
 
 #user-settings-container {
-  display: flex;
   width: 100%;
 }
 #user-settings-container.hide {
   display: none;
 }
-#user-personal-info {
-  width: 50%;
+#user-settings-container h2 {
+  margin: 0 0 20px 0;
+}
+#user-settings-container h3 {
+  margin: 0 0 10px 0;
+  font-weight: 500;
+}
+#user-profile-container {
+  width: 49%;
   margin-right: 2%;
 }
 #user-personal-image {
   margin: 30px 0;
-}
-#user-personal-image h2 {
-  margin: 0 0 20px 0;
 }
 #user-personal-image img{
   width: 112px;
@@ -1536,14 +1545,18 @@ footer span {
 #user-personal-image .iberu-button.big:not(:last-of-type) {
   margin: 0 0 10px 0;
 }
-#user-edit-profile {
+#user-profile-form,
+#user-password-form {
   display: block;
   margin: 0 0 80px 0;
 }
-#user-edit-profile label {
+#user-profile-form label,
+#user-password-form label {
   display: block;
 }
-#user-edit-profile input[type=text] {
+#user-profile-form input[type=text],
+#user-password-form input[type=text],
+#user-password-form input[type=password] {
   width: 100%;
   margin: 4px 0 10px 0;
   padding: 8px 4px;
@@ -1552,8 +1565,13 @@ footer span {
   background: transparent;
   color: var(--color-text);
 }
-#user-creator-banner {
-  width: 50%;
+#user-advance-container {
+  width: 49%;
+  margin: 30px 0 0 0;
+}
+
+#logout {
+  color: var(--color-negative) !important;
 }
 /*############################################################################*/
 

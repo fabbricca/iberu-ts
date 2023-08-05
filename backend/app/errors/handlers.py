@@ -15,7 +15,10 @@ def wants_json_response():
 def not_found_error(error):
     if wants_json_response():
         return api_error_response(404)
-    return render_template('errors/404.html'), 404
+    context = {
+        'current': 0,
+    }
+    return render_template('errors/404.html', context=context), 404
 
 
 
@@ -34,4 +37,7 @@ def internal_error(error):
     db.session.rollback()
     if wants_json_response():
         return api_error_response(500)
-    return render_template('errors/500.html'), 500
+    context = {
+        'current': 0,
+    }
+    return render_template('errors/500.html', context=context), 500

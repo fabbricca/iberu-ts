@@ -1,7 +1,7 @@
 from app import db
 from app.main import bp
-from app.main.forms import EditProfileForm
-from app.models import Asset, Backtest, Candlestick, Country, Creator, Crypto, Exchange, Indicator, Strategy, StrategyAsset, StrategyIndicator, Trade, User
+from app.main.forms import EditProfileForm, ChangePasswordRequestForm
+from app.models import Api, Asset, Backtest, Candlestick, Country, Creator, Crypto, Exchange, Indicator, Strategy, StrategyAsset, StrategyIndicator, Trade, User
 
 from .classes import MonthStrategyEarning
 
@@ -114,15 +114,17 @@ def user():
     current_timestamp = datetime.now().timestamp()
     discount = invites if invites < 5 else 5 + 0.25 * (invites - 5)
     active_subscriptions = text(f"""SELECT t.id, p.name as strategy, a1.name, s.subscription_timestamp as start, s.unsubscription_timestamp as end, 
-                                    s.preferred_leverage as leverage, a2.name as quote
+                                    s.preferred_leverage as leverage, a2.name as quote, s.active, s.capital, ap.name
                                     FROM transaction t
                                     JOIN subscription s ON s.transaction_id = t.id
                                     JOIN product p ON t.product_id = p.id
                                     JOIN strategyasset sa ON sa.strategy_id = p.id
                                     JOIN asset a1 ON a1.id = sa.asset_id
                                     JOIN asset a2 ON a2.id = s.quote_id
+                                    LEFT JOIN api ap ON ap.id = s.api_id
                                     WHERE t.user_id = {current_user.id} AND s.unsubscription_timestamp > {current_timestamp} 
-                                    GROUP BY t.id, p.name, a1.name, s.subscription_timestamp, s.unsubscription_timestamp, s.preferred_leverage, a2.name;""").compile()
+                                    GROUP BY t.id, p.name, a1.name, s.subscription_timestamp, s.unsubscription_timestamp,
+                                             s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").compile()
     data = [r for r in db.engine.execute(active_subscriptions)]
     active_subscriptions = []
     unique_ids = list(set([s[0] for s in data]))
@@ -130,21 +132,23 @@ def user():
       if subscription[0] in unique_ids:
         assets = [s[2] for s in data if s[0] == subscription[0]]
         unique_ids.remove(subscription[0])
-        active_subscriptions.append(dict(zip(['transaction', 'strategy', 'asset', 'start', 'end', 'leverage', 'quote'], subscription)))
+        active_subscriptions.append(dict(zip(['transaction', 'strategy', 'asset', 'start', 'end', 'leverage', 'quote', 'active', 'capital', 'api'], subscription)))
         active_subscriptions[-1]['asset'] = ['/static/img/assets_icons/' + i.lower() + '.png' for i in assets]
         active_subscriptions[-1]['start'] = datetime.fromtimestamp(active_subscriptions[-1]['start']).strftime('%Y-%m-%d %H:%M:%S')
         active_subscriptions[-1]['end'] = datetime.fromtimestamp(active_subscriptions[-1]['end']).strftime('%Y-%m-%d %H:%M:%S')
         active_subscriptions[-1]['quote'] = '/static/img/assets_icons/' + active_subscriptions[-1]['quote'].lower() + '.png'
     ended_subscriptions = text(f"""SELECT t.id, p.name as strategy, a1.name, s.subscription_timestamp as start, s.unsubscription_timestamp as end, 
-                                    s.preferred_leverage as leverage, a2.name as quote
+                                    s.preferred_leverage as leverage, a2.name as quote, s.active, s.capital, ap.name
                                     FROM transaction t
                                     JOIN subscription s ON s.transaction_id = t.id
                                     JOIN product p ON t.product_id = p.id
                                     JOIN strategyasset sa ON sa.strategy_id = p.id
                                     JOIN asset a1 ON a1.id = sa.asset_id
                                     JOIN asset a2 ON a2.id = s.quote_id
+                                    LEFT JOIN api ap ON ap.id = s.api_id
                                     WHERE t.user_id = {current_user.id} AND s.unsubscription_timestamp <= {current_timestamp} 
-                                    GROUP BY t.id, p.name, a1.name, s.subscription_timestamp, s.unsubscription_timestamp, s.preferred_leverage, a2.name;""").compile()
+                                    GROUP BY t.id, p.name, a1.name, s.subscription_timestamp, s.unsubscription_timestamp,
+                                             s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").compile()
     data = [r for r in db.engine.execute(ended_subscriptions)]
     ended_subscriptions = []
     unique_ids = list(set([s[0] for s in data]))
@@ -152,7 +156,7 @@ def user():
       if subscription[0] in unique_ids:
         assets = [s[2] for s in data if s[0] == subscription[0]]
         unique_ids.remove(subscription[0])
-        ended_subscriptions.append(dict(zip(['transaction', 'strategy', 'asset', 'start', 'end', 'leverage', 'quote'], subscription)))
+        ended_subscriptions.append(dict(zip(['transaction', 'strategy', 'asset', 'start', 'end', 'leverage', 'quote', 'active', 'capital', 'api'], subscription)))
         ended_subscriptions[-1]['asset'] = ['/static/img/assets_icons/' + i.lower() + '.png' for i in assets]
         ended_subscriptions[-1]['start'] = datetime.fromtimestamp(ended_subscriptions[-1]['start']).strftime('%Y-%m-%d %H:%M:%S')
         ended_subscriptions[-1]['end'] = datetime.fromtimestamp(ended_subscriptions[-1]['end']).strftime('%Y-%m-%d %H:%M:%S')
@@ -203,7 +207,10 @@ def user():
         data[-1]['trading_type'] = TRADING_TYPE[data[-1]['trading_type']]
         if data[-1]['total'] == 0: data[-1]['total'] = 1
         if not data[-1]['performance']: data[-1]['performance'] = 0
-    form = EditProfileForm()
+    api = [a.__json__(exchange=True) for a in Api.query.filter(Api.user_id==current_user.id).all()]
+    profile_form = EditProfileForm()
+    password_form = ChangePasswordRequestForm()
+    print(active_subscriptions)
     context = {
         'current': 0,
         'referral_code': referral_code,
@@ -212,8 +219,9 @@ def user():
         'active_subscriptions': active_subscriptions,
         'ended_subscriptions': ended_subscriptions,
         'strategies_earning': data,
+        'api': api,
     }
-    return render_template('user.html', context=context, form=form)
+    return render_template('user.html', context=context, profile_form=profile_form, password_form=password_form)
 
 
 
@@ -276,9 +284,9 @@ def ssearch():
   for s in strategies_e:
       s['trading_type'] = TRADING_TYPE[s['trading_type']]
   context = {
+      'current': 1,
       'top_performer': data,
       'strategies_earning': strategies_e,
-      'current': 0,
   }
   return render_template('ssearch.html', context=context)
 
@@ -490,5 +498,18 @@ def uchihaItachi():
                         WHERE t.close_timestamp>={str(month_t)}) t ON t.product_id = s.id
                     GROUP BY s.id ORDER BY percentage DESC;""").compile()
     db.engine.execute(view)
-    #topstrategy view will be dropped and recreated whenever a new trade is closed
+    check_subscription = text("""DELIMITER //
+
+                                CREATE EVENT check_subscription
+                                ON SCHEDULE EVERY 1 HOUR
+                                ON COMPLETION PRESERVE
+                                DO
+                                    UPDATE subscription
+                                    SET active = FALSE
+                                    WHERE unsubscription_timestamp <= NOW();
+
+                                //
+
+                                DELIMITER ;""").compile()
+    db.engine.execute(check_subscription)
     return redirect(url_for('main.index'))
