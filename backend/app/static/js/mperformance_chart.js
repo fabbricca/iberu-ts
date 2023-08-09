@@ -637,7 +637,8 @@ import { TOUCH } from '/static/js/chartResources.js'
 		const lineChart = chartInnerContainer.querySelector('#line-chart-container');
 
 		lineChart.classList.contains('fade') ? lineChart.classList.remove('fade') : lineChart.classList.add('fade');
-		chartInnerContainer.querySelector('.chart-modal').classList.contains('show') ? chartInnerContainer.querySelector('.chart-modal').classList.remove('show') : chartInnerContainer.querySelector('.chart-modal').classList.add('show');
+		chartInnerContainer.querySelector('.chart-modal').classList.contains('show') ? 
+		chartInnerContainer.querySelector('.chart-modal').classList.remove('show') : chartInnerContainer.querySelector('.chart-modal').classList.add('show');
 	}
 
 

@@ -1091,7 +1091,8 @@ Date.prototype.nextCandlestickTime = () => {
 
 		candlestickChart.classList.contains('fade') ? candlestickChart.classList.remove('fade') : candlestickChart.classList.add('fade');
 		externalIndicatorsChart.classList.contains('fade') ? externalIndicatorsChart.classList.remove('fade') : externalIndicatorsChart.classList.add('fade');
-		chartInnerContainer.querySelector('.chart-modal').classList.contains('show') ? chartInnerContainer.querySelector('.chart-modal').classList.remove('show') : chartInnerContainer.querySelector('.chart-modal').classList.add('show');
+		chartInnerContainer.querySelector('.chart-modal').classList.contains('show') ?
+		chartInnerContainer.querySelector('.chart-modal').classList.remove('show') : chartInnerContainer.querySelector('.chart-modal').classList.add('show');
 	}
 
 

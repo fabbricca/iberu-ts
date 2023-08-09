@@ -3,7 +3,7 @@ from app.api import bp
 from app.models import Asset, StrategyIndicator, Strategy, Trade, Candlestick, Exchange, StrategyAsset
 
 import sqlalchemy as sa
-from sqlalchemy.sql import text
+from sqlalchemy import text, bindparam, func
 
 from flask import jsonify, request
 from flask_login import current_user, AnonymousUserMixin
@@ -37,34 +37,71 @@ def query_strategy():
   data = request.get_json()
   if data['strategy'] == 'null':
     return jsonify({'result': False})
-  data['strategy'] = "%{}%".format(str(data['strategy']))
-  query_result = Strategy.query.filter(Strategy.name.ilike(data['strategy'])).all()
-  month_timestamp = (datetime.now() - relativedelta(months=1)).timestamp()
+  initial_t = (datetime.now() - relativedelta(months=1)).timestamp()
+  strategy_name = data['strategy']
+  strategies = text(
+      """
+      SELECT p.id, a.name, p.name, s.trading_type,
+          (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= :initial_t AND t.product_id = s.id AND t.percentage >= 0) AS count1,
+          (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= :initial_t AND t.product_id = s.id) AS count2,
+          (SELECT SUM(t.percentage) FROM trade t WHERE t.close_timestamp >= :initial_t AND t.product_id = s.id) AS sum_percentage,
+      p.price
+      FROM (SELECT * FROM topstrategies ORDER BY CASE 
+              WHEN percentage IS NULL THEN 1
+              WHEN percentage < 0 THEN 2
+              ELSE 0                   
+          END, percentage DESC) ts
+      JOIN product p ON ts.id = p.id
+      JOIN strategy s ON s.id = p.id
+      JOIN strategyasset sa ON sa.strategy_id = s.id
+      JOIN asset a ON a.id = sa.asset_id
+      WHERE p.name LIKE :strategy
+      GROUP BY p.id, a.name
+      ORDER BY CASE 
+          WHEN sum_percentage IS NULL THEN 1
+          WHEN sum_percentage < 0 THEN 2
+          ELSE 0                   
+      END, sum_percentage DESC;
+      """
+  )
+  strategies = strategies.bindparams(initial_t=initial_t, strategy=f"%{strategy_name}%")
+  strategies = [r for r in db.engine.execute(strategies)]
+  unique_ids = list(set([s[0] for s in strategies]))
   html = ''
-  for q in query_result:
-    if q.name in data['found']: continue
-    html += f'''<tr class="{q.trading_type} query show">
-          <td>
-            <img src="/static/img/assets_icons/bitcoin.png" class="coin-icon" alt="coin icon">
-          </td>
-          <td>
-            <a href="/strategy/{q.name}">{q.name}</a>
-          </td>
-          <td>
-            {q.trading_type}
-          </td>
-          <td class="{"positive" if q.winrate >= 50 else "negative"}">
-            {round(q.winrate, 2)}%
-          </td>
-          <td class="{"positive" if 50 >= 0 else "negative"}">
-            {round(50, 2)}%
-          </td>
-          <td>
-            {f'${q.price}' if q.price > 0 else 'Free'}
-          </td>
-          <td>
-            <img src="/static/img/strategy_month_performance/{q.id}.svg" class="strategy-svg" alt="strategy icon">
-          </td>'''
+  for s in strategies:
+    if s[2] in data['found']: continue
+    if s[0] in unique_ids:
+      asset = ''
+      assets = [st[1] for st in strategies if st[0] == s[0]]
+      unique_ids.remove(s[0])
+      for a in assets:
+        asset += f'''<div>
+                        <img src="/static/img/assets_icons/{a}.png" class="multi icon" alt="{a} coin icon">
+                     </div>'''
+      html += f'''<tr class="{s[3]} query show">
+            <td>
+              <div class="hlist">
+                {asset}
+              </div>
+            </td>
+            <td>
+              <a href="/strategy/{s[2]}">{s[2]}</a>
+            </td>
+            <td>
+              {s[3]}
+            </td>
+            <td class="{"positive" if s[4] / s[5] >= 50 else "negative"}">
+              {round(s[4] / s[5], 2)}%
+            </td>
+            <td class="{"positive" if s[6] >= 0 else "negative"}">
+              {round(s[6], 2)}%
+            </td>
+            <td>
+              {f'${s[7]}' if s[7] > 0 else 'Free'}
+            </td>
+            <td>
+              <img src="/static/img/general_performance/{s[0]}.svg" class="chart-icon" alt="{s[2]} strategy icon">
+            </td>'''
   return html
 
 
@@ -141,7 +178,7 @@ def get_strategy():
 
 
 
-@bp.route('/strategy/historical_candlestick', methods=['POST'])
+@bp.route('/strategy/historical-candlestick', methods=['POST'])
 def get_candlestick():
   data = request.get_json()
   try:

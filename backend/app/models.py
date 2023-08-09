@@ -169,6 +169,17 @@ class Api(db.Model):
   exchange_id = db.Column(db.Integer, db.ForeignKey("exchange.id"))
   exchange = db.relationship("Exchange")
 
+  def __init__(self, name, api_key, api_secret, user_id, exchange_id):
+    api_key_cipher = Fernet(current_app.config['API_KEY'])
+    api_secret_cipher = Fernet(current_app.config['API_SECRET'])
+    api_key_hash = api_key_cipher.encrypt(api_key.encode())
+    api_secret_hash = api_secret_cipher.encrypt(api_secret.encode())
+    self.name = name
+    self.api_key_hash = api_key_hash
+    self.api_secret_hash = api_secret_hash
+    self.user_id = user_id
+    self.exchange_id = exchange_id
+
   def __json__(self, exchange = False, **kwargs):
     dictionary = {}
     k = current_app.config['API_KEY']

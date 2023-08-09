@@ -102,7 +102,7 @@ export const getPageChart = () => {
 
 export const addHistoricalCandlesticks = async () => {
   setUpdatingCandlesticksLock(true);
-  const serverResponse = await fetch(`${window.origin}/api/strategy/historical_candlestick`, {
+  const serverResponse = await fetch(`${window.origin}/api/strategy/historical-candlestick`, {
                                         method: 'POST',
                                         credentials: 'include',
                                         body: JSON.stringify({strategy: document.getElementById("line-chart").dataset.strategy,

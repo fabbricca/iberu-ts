@@ -1,6 +1,6 @@
 from app import db
 from app.api import bp
-from app.models import Indicator, Product, Subscription, Transaction, Asset, Api
+from app.models import Indicator, Product, Subscription, Transaction, Asset, Api, Exchange
 
 from .tokens import isAuth
 
@@ -109,12 +109,12 @@ def user_subscription():
 
 
 @bp.route('/user/delete_api', methods=['POST'])
-def user_api():
+def user_delete_api():
   if not isAuth(request):
     return jsonify({'result': False})
   data = request.get_json()
   api = Api.query.filter((Api.name==data['api'])&(Api.user_id==current_user.id)).first()
-  if (api):
+  if api:
     current_timestamp = datetime.now().timestamp()
     active_subscription = text(f"""UPDATE subscription s
                                     SET s.api_id = NULL, s.active = 0
@@ -123,6 +123,21 @@ def user_api():
     db.session.delete(api)
     db.session.commit()
   return jsonify({'result': True})
+
+
+
+
+@bp.route('/user/create_api', methods=['POST'])
+def user_create_api():
+  if not isAuth(request):
+    return jsonify({'result': False})
+  data = request.get_json()
+  exchange = Exchange.query.filter(Exchange.name==data['exchange']).first()
+  if exchange and data['api'] != 'null':
+    db.session.add(Api(name=data['api'][:9], api_key=data['api_key'], api_secret=data['api_secret'], user_id=current_user.id, exchange_id=exchange.id))
+    db.session.commit()
+    return jsonify({'result': True})
+  return jsonify({'result': False})
 
 
 

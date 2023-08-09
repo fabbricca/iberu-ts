@@ -99,7 +99,7 @@
       </button>
     </nav>
 
-    <main id="user-main" class="row">
+    <main id="user-main-container" class="row">
 
       <div id="user-navbar-container" class="column">
         <div class="vlist">
@@ -214,18 +214,16 @@
             </div>
 
             <div id="user-doughnut-container" class="row">
-              <div id="user-doughnut">
-                <div class="column left" id="user-assets">
-                  <canvas></canvas>
-                </div>
-                <div class="column" id="user-strategies">
-                  <canvas></canvas>
-                </div>
+              <div class="column left" id="user-assets">
+                <canvas></canvas>
+              </div>
+              <div class="column" id="user-strategies">
+                <canvas></canvas>
               </div>
             </div>
           </div>
 
-          <div id="user-suggestions-container" class="column">
+          <div id="user-suggestions-container">
             <div id="user-suggestions" class="row">
               <h2>Recommended For {{ current_user.name }}</h2>
               <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
@@ -377,7 +375,7 @@
                     <button class="hitem big dropdown-button">
                       <img src="{{ s.quote }}" class="icon">
                     </button>
-                    <div class="hide info modal">
+                    <div id="subscription-quote" class="hide info modal">
                       <div class="vlist">
                         <button class="quote vitem big">
                           <div class="hlist">
@@ -404,10 +402,10 @@
                     <button class="hitem big dropdown-button">
                       {{ s.api }}
                     </button>
-                    <div class="hide info modal">
+                    <div id="subscription-api" class="hide info modal">
                       <div class="vlist">
                         {% for a in context.api %}
-                          <button class="api vitem big" data-value="{{a.name}}">
+                          <button class="api vitem big" id="api-{{a.name}}" data-value="{{a.name}}">
                             {{a.name}}
                           </button>
                         {% endfor %}
@@ -447,7 +445,7 @@
               {% endfor %}
             </tbody>
           </table>
-          <button id="subscription-confirm" class="iberu-button medium submit">Confirm</button>
+          <button id="subscription-confirm" class="iberu-button medium submit">Submit</button>
         </div>
       </div>
 
@@ -495,35 +493,71 @@
       </div>
 
       <div id="user-api-container" class="external-container narrow hide">
-        <div class="external-container narrow">
+        <div class="external-container large">
           <h1>User APIs</h1>
-          <h2>Active APIs</h2>
-          <table class="strategies-table" aria-label="">
-            <caption class="visually-hidden">This table contains the user's last 20 subscription</caption>
-            <thead>
-              <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Api key</th>
-                <th scope="col">Exchange</th>
-                <th scope="col">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for a in context.api %}
+          <div id="user-active-api">
+            <h2>Active APIs</h2>
+            <table class="api-table" aria-label="">
+              <caption class="visually-hidden">This table contains the user's apis</caption>
+              <thead>
                 <tr>
-                  <td>{{ a.name }}</td>
-                  <td>{{ a.api_key_hash }}</td>
-                  <td>{{ a.exchange.name }}</td>
-                  <td>
-                    <button class="negative" data-value="{{ a.name }}">
-                      <i class="fa-regular fa-trash-can fa-lg"></i>
-                    </button>
-                  </td>
+                  <th scope="col">Name</th>
+                  <th scope="col">Api key</th>
+                  <th scope="col">Exchange</th>
+                  <th scope="col">Delete</th>
                 </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          
+              </thead>
+              <tbody>
+                {% for a in context.api %}
+                  <tr>
+                    <td>{{ a.name }}</td>
+                    <td>{{ a.api_key_hash }}</td>
+                    <td>{{ a.exchange.name }}</td>
+                    <td>
+                      <button class="negative" data-value="{{ a.name }}">
+                        <i class="fa-regular fa-trash-can fa-lg"></i>
+                      </button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div id="user-api-form">
+            <h2>Create API</h2>
+            <div class="hlist">
+              <div class="hitem vlist">
+                <label for="user-api-exchange">Api exchange</label>
+                <button id="user-api-exchange" class="vitem dropdown-button">
+                  <div class="hlist">
+                    <img src="/static/img/exchange_icons/binance.png" class="hitem icon" data-value="Binance">
+                    <div class="hitem">Binance</div>
+                  </div>
+                </button>
+                <div class="hide info modal">
+                  <div class="vlist">
+                    {% for e in context.exchange %}
+                      <button class="exchange vitem">
+                        <div class="hlist">
+                          <img src="/static/img/exchange_icons/{{ e|lower }}.png" class="hitem icon" data-value="{{ e }}">
+                          <div class="hitem">{{ e }}</div>
+                        </div>
+                      </button>
+                    {% endfor %}
+                  </div>
+                </div>
+                <label for="api-name">Api Name</label>
+                <input id="api-name" type="text" class="vitem">
+              </div>
+              <div class="hitem vlist">
+                <label for="api-key">Api key</label>
+                <input id="api-key" type="text" class="vitem">
+                <label for="api-secret">Api secret</label>
+                <input id="api-secret" type="text" class="vitem">
+              </div>
+            </div>
+            <button id="create-api" class="iberu-button medium submit">Submit</button>
+          </div>
         </div>
       </div>
     

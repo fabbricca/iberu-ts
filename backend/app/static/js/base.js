@@ -162,6 +162,10 @@ const observer = new IntersectionObserver((entries) => {
 });
 const animatedElements = document.querySelectorAll('.animate.hide');
 animatedElements.forEach((el) => observer.observe(el));
+const animatedCircles = document.querySelectorAll('.circle');
+animatedCircles.forEach((el) => observer.observe(el));
+const animatedImage = document.querySelectorAll('.step-img');
+animatedImage.forEach((el) => observer.observe(el));
 
 
 const smartphone = document.querySelectorAll(".smartphone");
@@ -349,27 +353,113 @@ if (removePictureBtn) {
 }
 
 
+async function removeApi(el) {
+  const token = await refreshTokenApi();
+  if (!token) return;
+  const btn = el.parentNode;
+  const serverResponse = await fetch(`${window.origin}/api/user/delete_api`, {
+    method: 'POST',
+    credentials: 'include',
+    body: JSON.stringify({api: btn.dataset.value}),
+    cache: 'no-cache',
+    headers: new Headers({
+      'authorization': `bearer ${token}`,
+      'content-type': 'application/json'
+    })
+  });
+  const table = btn.parentNode.parentNode.parentNode;
+  table.removeChild(btn.parentNode.parentNode);
+  userSubscriptionContainer.querySelectorAll('.subscription').forEach((el) => {
+    let apiOptions = el.querySelector('#subscription-api').querySelector('.vlist');
+    apiOptions.querySelector(`#api-${btn.dataset.value}`).remove();
+  });
+}
+
+
 const userApiContainer = document.querySelector('#user-api-container');
-const removeApiBtn = userApiContainer.querySelectorAll('.fa-trash-can');
-if (removeApiBtn) {
+if (userApiContainer) {
+
+  function clickHandlerApi(event) {
+    removeApi(event.target);
+  }
+
+  const table = userApiContainer.querySelector('.api-table');
+  let removeApiBtn = userApiContainer.querySelectorAll('.fa-trash-can');
   removeApiBtn.forEach((el) => {
-    el.addEventListener('click', async() => {
-      const token = await refreshTokenApi();
-      if (!token) return;
-      const btn = el.parentNode;
-      const serverResponse = await fetch(`${window.origin}/api/user/delete_api`, {
-        method: 'POST',
-        credentials: 'include',
-        body: JSON.stringify({api: btn.dataset.value}),
-        cache: 'no-cache',
-        headers: new Headers({
-          'authorization': `bearer ${token}`,
-          'content-type': 'application/json'
-        })
-      });
-      const table = btn.parentNode.parentNode.parentNode;
-      table.removeChild(btn.parentNode.parentNode);
+    el.addEventListener('click', clickHandlerApi);
+  });
+
+  const exchangeBtn = userApiContainer.querySelector('#user-api-exchange');
+  exchangeBtn.addEventListener('click', () => {
+    const modal = exchangeBtn.parentNode.querySelector('.info.modal');
+    modal.classList.contains('show') ? modal.classList.remove('show') : modal.classList.add('show');
+  });
+
+  const exchange = document.querySelectorAll(".exchange");
+  exchange.forEach((el) => {
+    el.addEventListener('click', () => {
+      const modal = exchangeBtn.parentNode.querySelector('.info.modal');
+      let div = exchangeBtn.querySelector('.hlist');
+      div.innerHTML = '';
+      div.appendChild(el.querySelector('.hlist').cloneNode(true));
+      console.log(el.querySelector('.hlist'), div);
+      modal.classList.remove('show');
     });
+  });
+
+  const createApiBtn = userApiContainer.querySelector('#create-api');
+  createApiBtn.addEventListener('click', async() => {
+    const token = await refreshTokenApi();
+    if (!token) return;
+    const apiName = userApiContainer.querySelector('#api-name').value;
+    const apiKey = userApiContainer.querySelector('#api-key').value;
+    const apiExchange = userApiContainer.querySelector('#user-api-exchange').querySelector('img').dataset.value;
+    const serverResponse = await fetch(`${window.origin}/api/user/create_api`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({api: apiName,
+                            exchange: apiExchange,
+                            api_key: apiKey,
+                            api_secret: userApiContainer.querySelector('#api-secret').value}),
+      cache: 'no-cache',
+      headers: new Headers({
+        'authorization': `bearer ${token}`,
+        'content-type': 'application/json'
+      })
+    });
+    const row = table.insertRow();
+    row.insertCell(0).innerText = apiName;
+    row.insertCell(1).innerText = apiKey;
+    row.insertCell(2).innerText = apiExchange;
+    row.insertCell(3).innerHTML = `<button class="negative" data-value="${apiName}">
+                                    <i class="fa-regular fa-trash-can fa-lg"></i>
+                                  </button>`;
+
+    userSubscriptionContainer.querySelectorAll('.subscription').forEach((el) => {
+      let apiOptions = el.querySelector('#subscription-api').querySelector('.vlist');
+      apiOptions.innerHTML += `<button class="api vitem big" id="api-${apiName}" data-value="${apiName}">
+                                 ${apiName}
+                               </button>`;
+      const apis = document.querySelectorAll(".api");
+      apis.forEach((el) => {
+        el.addEventListener('click', () => {
+          const currentApi = el.parentNode.parentNode.parentNode;
+          currentApi.dataset.value = el.dataset.value;
+          currentApi.querySelector('button').innerText = el.dataset.value;
+          currentApi.classList.remove('show');
+        });
+  });
+    });
+
+    removeApiBtn = userApiContainer.querySelectorAll('.fa-trash-can');
+    removeApiBtn.forEach((el) => {
+      el.removeEventListener("click", clickHandlerApi);
+      el.addEventListener('click', clickHandlerApi);
+    });
+    
+    userApiContainer.querySelector('#api-name').value = '';
+    userApiContainer.querySelector('#api-key').value = '';
+    userApiContainer.querySelector('#api-secret').value = '';
   });
 }
 

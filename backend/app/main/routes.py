@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
 import sqlalchemy as sa
-from sqlalchemy.sql import text
+from sqlalchemy import text
 
 from flask import current_app, render_template, redirect, url_for, request, send_from_directory, jsonify
 from flask_login import current_user, login_required
@@ -166,17 +166,17 @@ def user():
                           (SELECT COUNT(*) FROM trade t
                                            JOIN transaction tr ON tr.product_id = t.product_id
                                            JOIN subscription su ON su.transaction_id = tr.id
-                                           WHERE su.subscription_timestamp >= {initial_t} AND t.open_timestamp >= su.subscription_timestamp
+                                           WHERE su.subscription_timestamp >= :initial_t AND t.open_timestamp >= su.subscription_timestamp
                                            AND t.product_id = s.id AND t.percentage >= 0 AND u.id = tr.user_id) AS count1,
                           (SELECT COUNT(*) FROM trade t
                                            JOIN transaction tr ON tr.product_id = t.product_id
                                            JOIN subscription su ON su.transaction_id = tr.id
-                                           WHERE su.subscription_timestamp >= {initial_t} AND t.open_timestamp >= su.subscription_timestamp
+                                           WHERE su.subscription_timestamp >= :initial_t AND t.open_timestamp >= su.subscription_timestamp
                                            AND t.product_id = s.id AND u.id = tr.user_id) AS count2,
                           (SELECT SUM(t.percentage) FROM trade t
                                            JOIN transaction tr ON tr.product_id = t.product_id
                                            JOIN subscription su ON su.transaction_id = tr.id
-                                           WHERE su.subscription_timestamp >= {initial_t} AND t.product_id = s.id AND t.open_timestamp >= su.subscription_timestamp
+                                           WHERE su.subscription_timestamp >= :initial_t AND t.product_id = s.id AND t.open_timestamp >= su.subscription_timestamp
                                            AND u.id = tr.user_id) AS sum_percentage,
                           p.price
                           FROM (SELECT * FROM topstrategies ORDER BY CASE 
@@ -190,12 +190,14 @@ def user():
                           JOIN strategy s ON s.id = p.id
                           JOIN strategyasset sa ON sa.strategy_id = s.id
                           JOIN asset a ON a.id = sa.asset_id
+                          WHERE u.id = :user
                           GROUP BY p.id, a.name, u.id
                           ORDER BY CASE 
                                   WHEN sum_percentage IS NULL THEN 1
                                   WHEN sum_percentage < 0 THEN 2
                                   ELSE 0                   
-                                 END, sum_percentage DESC""").compile()
+                                 END, sum_percentage DESC""")
+    strategies = strategies.bindparams(initial_t=initial_t, user=current_user.id)
     strategies = [r for r in db.engine.execute(strategies)]
     unique_ids = list(set([s[0] for s in strategies]))
     for strategy in strategies:
@@ -208,9 +210,9 @@ def user():
         if data[-1]['total'] == 0: data[-1]['total'] = 1
         if not data[-1]['performance']: data[-1]['performance'] = 0
     api = [a.__json__(exchange=True) for a in Api.query.filter(Api.user_id==current_user.id).all()]
+    exchange = [e for e, in db.session.query(Exchange.name).all()]
     profile_form = EditProfileForm()
     password_form = ChangePasswordRequestForm()
-    print(active_subscriptions)
     context = {
         'current': 0,
         'referral_code': referral_code,
@@ -220,6 +222,7 @@ def user():
         'ended_subscriptions': ended_subscriptions,
         'strategies_earning': data,
         'api': api,
+        'exchange': exchange,
     }
     return render_template('user.html', context=context, profile_form=profile_form, password_form=password_form)
 
@@ -506,7 +509,7 @@ def uchihaItachi():
                                 DO
                                     UPDATE subscription
                                     SET active = FALSE
-                                    WHERE unsubscription_timestamp <= NOW();
+                                    WHERE unsubscription_timestamp <= UNIX_TIMESTAMP(NOW());
 
                                 //
 
