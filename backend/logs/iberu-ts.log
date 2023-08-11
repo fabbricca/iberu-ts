@@ -1,0 +1,106 @@
+2023-08-04 10:28:16,660 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 10:28:51,215 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 10:32:36,984 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 10:33:48,727 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 10:35:04,110 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 10:35:07,230 ERROR: Exception on /auth/reset_password_request [POST] [in C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py:1414]
+Traceback (most recent call last):
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\app\auth\routes.py", line 163, in reset_password_request
+    send_password_reset_email(user)
+  File "C:\Users\fabbr\Desktop\iberu\backend\app\auth\email.py", line 6, in send_password_reset_email
+    token = user.get_reset_password_token()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\app\models.py", line 109, in get_reset_password_token
+    {"reset_password": self.username, "exp": time() + expires_in},
+                       ^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'username'
+2023-08-04 10:35:34,879 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 10:37:54,046 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 10:38:44,073 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 10:38:55,296 ERROR: Exception on /auth/reset_password/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNldF9wYXNzd29yZCI6MywiZXhwIjoxNjkxMTM4OTI5Ljk1NDk3NH0.PU7VU3GDWoJWfxD9bPhEXvJ6kcAri1xIdUIJYasG9qA [GET] [in C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py:1414]
+Traceback (most recent call last):
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\app\auth\routes.py", line 183, in reset_password
+    return render_template('auth/reset_password.html', form=form)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\jinja2\environment.py", line 1301, in render
+    self.environment.handle_exception()
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\jinja2\environment.py", line 936, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\fabbr\Desktop\iberu\backend\app\templates\auth\reset_password.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\templating.py", line 64, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: base.html
+2023-08-04 10:56:30,986 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 10:56:55,626 ERROR: Exception on /auth/reset_password/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNldF9wYXNzd29yZCI6MywiZXhwIjoxNjkxMTQwMDA5LjQwMDgzMTd9.03ir9C7Altx5936PvjlA9hjdmpEK_DPs6X-FQWeQYNk [GET] [in C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py:1414]
+Traceback (most recent call last):
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\app\auth\routes.py", line 183, in reset_password
+    return render_template('auth/reset_password.html', form=form)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\flask\templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\jinja2\environment.py", line 1301, in render
+    self.environment.handle_exception()
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\jinja2\environment.py", line 936, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\fabbr\Desktop\iberu\backend\app\templates\auth\reset_password.html", line 25, in top-level template code
+    {% if context.current == 1 %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fabbr\Desktop\iberu\backend\env\Lib\site-packages\jinja2\environment.py", line 485, in getattr
+    return getattr(obj, attribute)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'context' is undefined
+2023-08-04 10:58:00,800 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 14:55:49,832 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 15:01:19,486 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 15:03:45,573 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
+2023-08-04 15:04:21,565 INFO: Iberu-TS startup [in C:\Users\fabbr\Desktop\iberu\backend\app\__init__.py:80]
