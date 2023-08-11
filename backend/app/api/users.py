@@ -2,7 +2,7 @@ from app import db
 from app.api import bp
 from app.models import Indicator, Product, Subscription, Transaction, Asset, Api, Exchange
 
-from .tokens import isAuth
+from ..func import isAuth
 
 from sqlalchemy.sql import text
 
@@ -20,9 +20,9 @@ SECONDS_IN_A_DAY = 86400
 
 
 
-@bp.route('/user', methods=['POST'])
+@bp.route('/users/<int:user>', methods=['GET'])
 @login_required
-def get_user():
+def get_user(user):
   trades = []
   dates = []
   query = text(f"""SELECT tr.percentage, tr.close_timestamp
@@ -67,9 +67,9 @@ def get_user():
 
 
 
-@bp.route('/user/subscription', methods=['POST'])
+@bp.route('/users/<int:user>/subscriptions', methods=['PATCH'])
 @login_required
-def user_subscription():
+def user_subscription(user):
   if not isAuth(request):
     return jsonify({'result': False})
   data = request.get_json()
@@ -108,43 +108,37 @@ def user_subscription():
 
 
 
-@bp.route('/user/delete_api', methods=['POST'])
-def user_delete_api():
+@bp.route('/users/<int:user>/apis', methods=['POST', 'DELETE'])
+@login_required
+def user_api(user):
   if not isAuth(request):
     return jsonify({'result': False})
   data = request.get_json()
-  api = Api.query.filter((Api.name==data['api'])&(Api.user_id==current_user.id)).first()
-  if api:
-    current_timestamp = datetime.now().timestamp()
-    active_subscription = text(f"""UPDATE subscription s
-                                    SET s.api_id = NULL, s.active = 0
-                                    WHERE s.api_id = {api.id} AND s.unsubscription_timestamp > {current_timestamp};""").compile()
-    db.engine.execute(active_subscription)
-    db.session.delete(api)
-    db.session.commit()
-  return jsonify({'result': True})
-
-
-
-
-@bp.route('/user/create_api', methods=['POST'])
-def user_create_api():
-  if not isAuth(request):
-    return jsonify({'result': False})
-  data = request.get_json()
-  exchange = Exchange.query.filter(Exchange.name==data['exchange']).first()
-  if exchange and data['api'] != 'null':
-    db.session.add(Api(name=data['api'][:9], api_key=data['api_key'], api_secret=data['api_secret'], user_id=current_user.id, exchange_id=exchange.id))
-    db.session.commit()
-    return jsonify({'result': True})
+  if request.method == 'DELETE':
+    api = Api.query.filter((Api.name==data['api'])&(Api.user_id==current_user.id)).first()
+    if api:
+      current_t = datetime.now().timestamp()
+      active_subscription = text(f"""UPDATE subscription s
+                                      SET s.api_id = NULL, s.active = 0
+                                      WHERE s.api_id = :api AND s.unsubscription_timestamp > :current_t;""").bindparams(api=api.id, current_t=current_t)
+      db.engine.execute(active_subscription)
+      db.session.delete(api)
+      db.session.commit()
+  elif request.method == 'POST':
+    exchange = Exchange.query.filter(Exchange.name==data['exchange']).first()
+    if exchange and data['api'] != 'null':
+      db.session.add(Api(name=data['api'][:9], api_key=data['api_key'], api_secret=data['api_secret'], user_id=current_user.id, exchange_id=exchange.id))
+      db.session.commit()
+      return jsonify({'result': True})
   return jsonify({'result': False})
 
 
 
 
-@bp.route('/user/color', methods=['POST'])
-def color():
-  if request.method == 'POST' and isAuth(request):
+@bp.route('/users/<int:user>/colors', methods=['PATCH'])
+@login_required
+def user_color(user):
+  if isAuth(request):
     for d in request.get_json():
       if 'strategy' in d:
         s = Product.query.filter(Product.id==d['strategy']).first()

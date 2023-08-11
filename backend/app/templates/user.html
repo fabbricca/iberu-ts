@@ -89,7 +89,7 @@
       </div>
 
       {% if current_user.is_authenticated %}
-        <a href="{{ url_for('main.user') }}" class="navbar-user"><img id="user-image" src="{{ url_for('main.retrieve_avatar') }}"></a>
+        <a href="{{ url_for('main.user', user=current_user.id) }}" class="navbar-user"><img id="user-image" src="{{ url_for('main.avatar', user=current_user.id) }}"></a>
       {% else %}
         <a href="/" class="navbar-creator iberu-button medium"><i class="fa-solid fa-gift"></i> Creator</a>
       {% endif %} 
@@ -99,7 +99,7 @@
       </button>
     </nav>
 
-    <main id="user-main-container" class="row">
+    <main id="user-main-container" class="row" data-user="{{current_user.id}}">
 
       <div id="user-navbar-container" class="column">
         <div class="vlist">
@@ -114,7 +114,7 @@
       <div id="user-overview-container" class="column">
 
         <div id="user-header-container" class="row panel">
-          <img id="user-image" class="big" src="{{ url_for('main.retrieve_avatar') }}">
+          <img id="user-image" class="big" src="{{ url_for('main.avatar', user=current_user.id) }}">
           <div id="user-info" class="vlist">
             <h2 class="vitem">{{ current_user.name }}</h2>
             <div class="vitem hlist">
@@ -157,7 +157,7 @@
             </div>
             <div id="user-chart-container" class="row">
               <div id="user-chart">
-                <lightweight-performance-chart data-strategy="{{ strategy }}" data-user="{{ current_user.username }}" 
+                <lightweight-performance-chart data-strategy="{{ strategy }}" data-user="{{ current_user.id }}" 
                   data-market="{{ context.market }}" data-indicators="{{ context.indicators }}">  
                 </lightweight-performance-chart>
               </div>
@@ -288,7 +288,7 @@
 
       <div id="user-subscription-container" class="hide">
         <div id="user-header-container" class="row panel">
-          <img id="user-image" class="big" src="{{ url_for('main.retrieve_avatar') }}">
+          <img id="user-image" class="big" src="{{ url_for('main.avatar', user=current_user.id) }}">
           <div id="user-info" class="vlist">
             <h2 class="vitem">{{ current_user.name }}</h2>
             <div class="vitem hlist">
@@ -456,15 +456,17 @@
             <div id="user-personal-image" class="vlist">
               <h2 class="vitem">Profile</h2>
               <div class="hlist">
-                <img id="user-image hitem" src="{{ url_for('main.retrieve_avatar') }}">
+                <img id="user-image hitem" src="{{ url_for('main.avatar', user=current_user.id) }}">
                 <div class="vlist hitem">
-                  <form action="{{ url_for('main.upload_avatar') }}" class="dropzone iberu-button big vitem">
+                  <form action="{{ url_for('main.avatar', user=current_user.id) }}" id="dropzone-form" class="iberu-button big vitem">
+                    Change Picture
                   </form>
                   <button id="user-remove-picture" class="iberu-button big white negative vitem"><i class="fa-regular fa-trash-can fa-lg"></i>Remove picture</button>
                 </div>
               </div>
             </div>
-            <form id="user-profile-form" action="{{ url_for('main.user_edit') }}" method="post">
+            <form id="user-profile-form" action="{{ url_for('main.user', user=current_user.id) }}" method="post">
+                <input type="hidden" name="_method" value="PATCH">
                 {{ profile_form.csrf_token(id="user-profile-token") }}
                 {{ profile_form.name.label }}
                 {{ profile_form.name(size=32, placeholder = current_user.name, autocomplete="off") }}

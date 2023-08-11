@@ -82,7 +82,7 @@
       </div>
 
       {% if current_user.is_authenticated %}
-        <a href="{{ url_for('main.user') }}" class="navbar-user"><img id="user-image" src="{{ url_for('main.retrieve_avatar') }}"></a>
+        <a href="{{ url_for('main.user', user=current_user.id) }}" class="navbar-user"><img id="user-image" src="{{ url_for('main.avatar', user=current_user.id) }}"></a>
       {% else %}
         <a href="/" class="navbar-creator iberu-button medium"><i class="fa-solid fa-gift"></i> Creator</a>
       {% endif %} 

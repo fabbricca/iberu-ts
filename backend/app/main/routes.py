@@ -12,12 +12,14 @@ from datetime import datetime
 import sqlalchemy as sa
 from sqlalchemy import text
 
-from flask import current_app, render_template, redirect, url_for, request, send_from_directory, jsonify
+from flask import current_app, abort, render_template, redirect, url_for, request, send_from_directory, jsonify
 from flask_login import current_user, login_required
 
 from werkzeug.utils import secure_filename
 
 from PIL import Image
+
+from ..func import isAuth
 
 import csv
 
@@ -106,9 +108,12 @@ def index():
 
 
 
-@bp.route('/user', methods=['GET'])
+@bp.route('/users/<int:user>', methods=['GET', 'PATCH', 'POST'])
 @login_required
-def user():
+def user(user):
+  if user != current_user.id:
+    abort(404)
+  elif request.method == 'GET':
     referral_code = current_user.name + '#' + str(ord(current_user.surname[0])) + str(ord(current_user.name[-1]))
     invites = db.session.query(sa.func.count(User.invite)).filter(User.invite==current_user.id).first()[0]
     current_timestamp = datetime.now().timestamp()
@@ -124,7 +129,7 @@ def user():
                                     LEFT JOIN api ap ON ap.id = s.api_id
                                     WHERE t.user_id = {current_user.id} AND s.unsubscription_timestamp > {current_timestamp} 
                                     GROUP BY t.id, p.name, a1.name, s.subscription_timestamp, s.unsubscription_timestamp,
-                                             s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").compile()
+                                            s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").compile()
     data = [r for r in db.engine.execute(active_subscriptions)]
     active_subscriptions = []
     unique_ids = list(set([s[0] for s in data]))
@@ -148,7 +153,7 @@ def user():
                                     LEFT JOIN api ap ON ap.id = s.api_id
                                     WHERE t.user_id = {current_user.id} AND s.unsubscription_timestamp <= {current_timestamp} 
                                     GROUP BY t.id, p.name, a1.name, s.subscription_timestamp, s.unsubscription_timestamp,
-                                             s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").compile()
+                                            s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").compile()
     data = [r for r in db.engine.execute(ended_subscriptions)]
     ended_subscriptions = []
     unique_ids = list(set([s[0] for s in data]))
@@ -164,26 +169,26 @@ def user():
     initial_t = (datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - relativedelta(months=1)).timestamp()
     strategies = text(f"""SELECT p.id, a.name, p.name, s.trading_type,
                           (SELECT COUNT(*) FROM trade t
-                                           JOIN transaction tr ON tr.product_id = t.product_id
-                                           JOIN subscription su ON su.transaction_id = tr.id
-                                           WHERE su.subscription_timestamp >= :initial_t AND t.open_timestamp >= su.subscription_timestamp
-                                           AND t.product_id = s.id AND t.percentage >= 0 AND u.id = tr.user_id) AS count1,
+                                          JOIN transaction tr ON tr.product_id = t.product_id
+                                          JOIN subscription su ON su.transaction_id = tr.id
+                                          WHERE su.subscription_timestamp >= :initial_t AND t.open_timestamp >= su.subscription_timestamp
+                                          AND t.product_id = s.id AND t.percentage >= 0 AND u.id = tr.user_id) AS count1,
                           (SELECT COUNT(*) FROM trade t
-                                           JOIN transaction tr ON tr.product_id = t.product_id
-                                           JOIN subscription su ON su.transaction_id = tr.id
-                                           WHERE su.subscription_timestamp >= :initial_t AND t.open_timestamp >= su.subscription_timestamp
-                                           AND t.product_id = s.id AND u.id = tr.user_id) AS count2,
+                                          JOIN transaction tr ON tr.product_id = t.product_id
+                                          JOIN subscription su ON su.transaction_id = tr.id
+                                          WHERE su.subscription_timestamp >= :initial_t AND t.open_timestamp >= su.subscription_timestamp
+                                          AND t.product_id = s.id AND u.id = tr.user_id) AS count2,
                           (SELECT SUM(t.percentage) FROM trade t
-                                           JOIN transaction tr ON tr.product_id = t.product_id
-                                           JOIN subscription su ON su.transaction_id = tr.id
-                                           WHERE su.subscription_timestamp >= :initial_t AND t.product_id = s.id AND t.open_timestamp >= su.subscription_timestamp
-                                           AND u.id = tr.user_id) AS sum_percentage,
+                                          JOIN transaction tr ON tr.product_id = t.product_id
+                                          JOIN subscription su ON su.transaction_id = tr.id
+                                          WHERE su.subscription_timestamp >= :initial_t AND t.product_id = s.id AND t.open_timestamp >= su.subscription_timestamp
+                                          AND u.id = tr.user_id) AS sum_percentage,
                           p.price
                           FROM (SELECT * FROM topstrategies ORDER BY CASE 
                                                                       WHEN percentage IS NULL THEN 1
                                                                       WHEN percentage < 0 THEN 2
                                                                       ELSE 0                   
-                                                                   END, percentage DESC LIMIT 10) ts
+                                                                  END, percentage DESC LIMIT 10) ts
                           JOIN product p ON ts.id = p.id
                           JOIN transaction tr ON tr.product_id = p.id
                           JOIN user u ON u.id = tr.user_id
@@ -196,7 +201,7 @@ def user():
                                   WHEN sum_percentage IS NULL THEN 1
                                   WHEN sum_percentage < 0 THEN 2
                                   ELSE 0                   
-                                 END, sum_percentage DESC""")
+                                END, sum_percentage DESC""")
     strategies = strategies.bindparams(initial_t=initial_t, user=current_user.id)
     strategies = [r for r in db.engine.execute(strategies)]
     unique_ids = list(set([s[0] for s in strategies]))
@@ -225,30 +230,24 @@ def user():
         'exchange': exchange,
     }
     return render_template('user.html', context=context, profile_form=profile_form, password_form=password_form)
+  elif request.method == 'PATCH' or request.form.get('_method') == 'PATCH':
+    form = EditProfileForm()
+    if form.validate_on_submit():
+      if form.name.data:
+        current_user.name = form.name.data
+      if form.surname.data:
+        current_user.surname = form.surname.data
+      if form.phone.data:
+        current_user.phone = form.phone.data
+      if form.discord.data:
+        current_user.discord = form.discord.data
+      db.session.commit()
+  return redirect(url_for('main.user', user=current_user.id))
 
 
 
 
-@bp.route('/user/edit', methods=['POST'])
-@login_required
-def user_edit():
-  form = EditProfileForm()
-  if form.validate_on_submit():
-    if form.name.data:
-      current_user.name = form.name.data
-    if form.surname.data:
-      current_user.surname = form.surname.data
-    if form.phone.data:
-      current_user.phone = form.phone.data
-    if form.discord.data:
-      current_user.discord = form.discord.data
-    db.session.commit()
-  return redirect(url_for('main.user'))
-
-
-
-
-@bp.route('/strategy')
+@bp.route('/strategies')
 def ssearch():
   data = []
   initial_t = (datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - relativedelta(months=1)).timestamp()
@@ -296,7 +295,7 @@ def ssearch():
 
 
 
-@bp.route('/strategy/<string:name>')
+@bp.route('/strategies/<string:name>')
 def strategy(name):
     strategy = Strategy.query.filter(Strategy.name==name).first_or_404()
     creator = Creator.query.filter(Creator.id==Strategy.creator_id).first()
@@ -382,54 +381,47 @@ def strategy(name):
 
 
 
-@bp.route('/retrieve_avatar')
+@bp.route('/users/<int:user>/avatar', methods=['GET', 'POST', 'DELETE'])
 @login_required
-def retrieve_avatar():
+def avatar(user):
+  if request.method == 'GET':
     for ext in current_app.config['UPLOAD_EXTENSIONS']:
       avatar_filename = f"{current_user.id}{ext}"
       if os.path.exists(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename)):
         return send_from_directory(current_app.config['UPLOAD_PATH'], avatar_filename)
     return redirect(current_user.avatar(128))
-
-
-
-
-@bp.route('/delete_avatar', methods=['POST'])
-@login_required
-def delete_avatar():
+  elif not isAuth(request):
+    return jsonify({'result': False,
+                     'message': 'The token used for authentication is either not valid or is missing. Please authenticate again via a new Log In.'})
+  if request.method == 'POST':
+    uploaded_file = request.files['file']
+    filename = secure_filename(uploaded_file.filename)
+    if filename != '':
+        for ext in current_app.config['UPLOAD_EXTENSIONS']:
+          avatar_filename = f"{current_user.id}{ext}"
+          if os.path.exists(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename)):
+            os.remove(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename))
+        file_ext = os.path.splitext(filename)[1]
+        if file_ext not in current_app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(uploaded_file.stream):
+            return "Invalid image", 400
+        uploaded_file.save(os.path.join(current_app.config['UPLOAD_PATH'], str(current_user.id) + file_ext))
+        image = Image.open(os.path.join(current_app.config['UPLOAD_PATH'], str(current_user.id) + file_ext))
+        if image.width <= image.height:
+          crop = (image.height - image.width) / 2
+          crop_area = (0, crop, image.width, image.height - crop)
+        else:
+          crop = (image.width - image.height) / 2
+          crop_area = (crop, 0, image.width - crop, image.height)
+        cropped_image = image.crop(crop_area)
+        cropped_image.save(os.path.join(current_app.config['UPLOAD_PATH'], str(current_user.id) + file_ext))  
+    return redirect(url_for('main.user', user=current_user.id))
+  elif request.method == 'DELETE':
     for ext in current_app.config['UPLOAD_EXTENSIONS']:
       avatar_filename = f"{current_user.id}{ext}"
       if os.path.exists(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename)):
           os.remove(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename))
-    return redirect(url_for('main.user'))
+    return redirect(url_for('main.user', user=current_user.id))
 
-
-
-
-@bp.route('/upload_avatar', methods=['POST'])
-@login_required
-def upload_avatar():
-  uploaded_file = request.files['file']
-  filename = secure_filename(uploaded_file.filename)
-  if filename != '':
-      for ext in current_app.config['UPLOAD_EXTENSIONS']:
-        avatar_filename = f"{current_user.id}{ext}"
-        if os.path.exists(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename)):
-           os.remove(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename))
-      file_ext = os.path.splitext(filename)[1]
-      if file_ext not in current_app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(uploaded_file.stream):
-          return "Invalid image", 400
-      uploaded_file.save(os.path.join(current_app.config['UPLOAD_PATH'], str(current_user.id) + file_ext))
-      image = Image.open(os.path.join(current_app.config['UPLOAD_PATH'], str(current_user.id) + file_ext))
-      if image.width <= image.height:
-        crop = (image.height - image.width) / 2
-        crop_area = (0, crop, image.width, image.height - crop)
-      else:
-        crop = (image.width - image.height) / 2
-        crop_area = (crop, 0, image.width - crop, image.height)
-      cropped_image = image.crop(crop_area)
-      cropped_image.save(os.path.join(current_app.config['UPLOAD_PATH'], str(current_user.id) + file_ext))  
-  return redirect(url_for('main.user'))
     
 
 

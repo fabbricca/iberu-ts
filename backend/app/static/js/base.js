@@ -28,7 +28,10 @@ function checkTokenValidity(token) {
 export const refreshTokenApi =  async () => {
   if (checkTokenValidity(getAccessToken())) return getAccessToken();
 
-  const serverResponse = await fetch(`${window.origin}/api/token_refresh`, {method: 'POST'});
+  const serverResponse = await fetch(`${window.origin}/api/token_refresh`, {method: 'GET', 
+                                                                            headers: new Headers({
+                                                                              'content-type': 'application/json'
+                                                                            })});
   let refreshTokenApiObj = await serverResponse.json();
   setAccessToken(refreshTokenApiObj.accessToken);
 
@@ -309,8 +312,8 @@ if (userSubscriptionContainer) {
     });
     const token = await refreshTokenApi();
     if (!token) return;
-    const serverResponse = await fetch(`${window.origin}/api/user/subscription`, {
-      method: 'POST',
+    const serverResponse = await fetch(`${window.origin}/api/users/${document.querySelector('main').dataset.user}/subscriptions`, {
+      method: 'PATCH',
       credentials: 'include',
       body: JSON.stringify(subscriptions),
       cache: 'no-cache',
@@ -322,17 +325,24 @@ if (userSubscriptionContainer) {
   })
 }
 
-
-const dropzone = document.querySelector('.dropzone');
-if (dropzone){
+const token = await refreshTokenApi();
+const dropzone = document.querySelector('#dropzone-form');
+if (dropzone) {
   Dropzone.autoDiscover = false;
-  var avatar = new Dropzone(".dropzone", {
+
+  // Initialize Dropzone for the avatar upload
+  var avatar = new Dropzone(dropzone, {
     thumbnail: null,
-    dictDefaultMessage: "Change picture",
   });
-  
+
+  // Attach headers to requests
+  avatar.on("sending", function(file, xhr, formData) {
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    // Add any other custom headers you need
+  });
+
   avatar.on("success", function (file, response) {
-      location.reload();
+    location.reload();
   });
 }
 
@@ -340,11 +350,12 @@ if (dropzone){
 const removePictureBtn = document.querySelector('#user-remove-picture');
 if (removePictureBtn) {
   removePictureBtn.addEventListener('click', async() => {
-    const serverResponse = await fetch(`${window.origin}/delete_avatar`, {
-      method: 'POST',
+    const serverResponse = await fetch(`${window.origin}/users/${document.querySelector('main').dataset.user}/avatar`, {
+      method: 'DELETE',
       credentials: 'include',
       cache: 'no-cache',
       headers: new Headers({
+        'authorization': `bearer ${token}`,
         'content-type': 'application/json'
       })
     });
@@ -357,8 +368,8 @@ async function removeApi(el) {
   const token = await refreshTokenApi();
   if (!token) return;
   const btn = el.parentNode;
-  const serverResponse = await fetch(`${window.origin}/api/user/delete_api`, {
-    method: 'POST',
+  const serverResponse = await fetch(`${window.origin}/api/users/${document.querySelector('main').dataset.user}/apis`, {
+    method: 'DELETE',
     credentials: 'include',
     body: JSON.stringify({api: btn.dataset.value}),
     cache: 'no-cache',
@@ -414,7 +425,7 @@ if (userApiContainer) {
     const apiName = userApiContainer.querySelector('#api-name').value;
     const apiKey = userApiContainer.querySelector('#api-key').value;
     const apiExchange = userApiContainer.querySelector('#user-api-exchange').querySelector('img').dataset.value;
-    const serverResponse = await fetch(`${window.origin}/api/user/create_api`, {
+    const serverResponse = await fetch(`${window.origin}/api/users/${document.querySelector('main').dataset.user}/apis`, {
       method: 'POST',
       credentials: 'include',
       body: JSON.stringify({api: apiName,

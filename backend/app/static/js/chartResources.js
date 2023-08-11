@@ -1,6 +1,7 @@
 import { getAccessToken, refreshTokenApi } from '/static/js/base.js';
 
-const sStrategy = document.documentElement.getAttribute('data-multiStrategy') === "false";
+const mStrategy = document.documentElement.getAttribute('data-multiStrategy') === "true";
+const strategyId = document.getElementById("line-chart").dataset.strategy;
 export const themeColors = {DARK: {CHART_TEXT_COLOR: '#606060',
 														CHART_BACKGROUND_COLOR: '#202020',
                             CHART_BORDER_COLOR: '#202020',},
@@ -15,8 +16,8 @@ export const changeColorApi = async (entry) => {
 
   if (!token) return;
 
-  const serverResponse = fetch(`${window.origin}/api/user/color`, {
-                                  method: 'POST',
+  const serverResponse = fetch(`${window.origin}/api/users/${document.querySelector("#line-chart").dataset.user}/colors`, {
+                                  method: 'PATCH',
                                   credentials: 'include',
                                   body: JSON.stringify(entry),
                                   cache: 'no-cache',
@@ -66,17 +67,38 @@ export const timeToLocal = (originalTime) => {
   return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()) / 1000;
 }
 
-const serverResponse = await fetch(`${window.origin}/api/strategy/candlestick`, {
-  method: 'POST',
+const stratResponse = await fetch(`${window.origin}/api/strategies/${strategyId}?mstrategy=${mStrategy}`, {
+  method: 'GET',
   credentials: 'include',
-  body: JSON.stringify({strategy: document.getElementById("line-chart").dataset.strategy}),
   cache: 'no-cache',
   headers: new Headers({
     'content-type': 'application/json'
   })
 });
 
-let candlesticksData = await serverResponse.json();
+let stratData = await stratResponse.json();
+
+const klineResponse = Array.isArray(stratData['uri']) ? 
+                      await fetch(`${window.origin}/api/candlesticks/${stratData['uri'][0]}`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: JSON.stringify({uri: stratData['uri'],}),
+                        cache: 'no-cache',
+                        headers: new Headers({
+                          'content-type': 'application/json'
+                        })
+                      }) :
+                      await fetch(`${window.origin}/api/candlesticks/${stratData['uri']}`, {
+                        method: 'GET',
+                        credentials: 'include',
+                        cache: 'no-cache',
+                        headers: new Headers({
+                          'content-type': 'application/json'
+                        })
+                      });
+
+let candlesticksData = Object.assign({}, stratData, await klineResponse.json());
+console.log(candlesticksData);
 candlesticksData.timestamp = [];
 for (let i=0; i < candlesticksData.date.length; i++) {
   candlesticksData.timestamp.push(candlesticksData.date[i]);
@@ -102,19 +124,37 @@ export const getPageChart = () => {
 
 export const addHistoricalCandlesticks = async () => {
   setUpdatingCandlesticksLock(true);
-  const serverResponse = await fetch(`${window.origin}/api/strategy/historical-candlestick`, {
-                                        method: 'POST',
+  const stratResponse = await fetch(`${window.origin}/api/strategies/${strategyId}?timestamp=${candlesticksData.timestamp[0]}&mstrategy=${mStrategy}`, {
+                                        method: 'GET',
                                         credentials: 'include',
-                                        body: JSON.stringify({strategy: document.getElementById("line-chart").dataset.strategy,
-                                                              end_period: candlesticksData.timestamp[0],
-                                                              timeframe: candlesticksData.timeframe}),
                                         cache: 'no-cache',
                                         headers: new Headers({
                                           'content-type': 'application/json'
                                         })
                                       });
 
-  let historicalCandlesticksData = await serverResponse.json();
+  let stratData = await stratResponse.json();
+
+  const klineResponse = Array.isArray(candlesticksData['uri']) ? 
+                        await fetch(`${window.origin}/api/candlesticks/${candlesticksData['uri'][0]}?timestamp=${candlesticksData.timestamp[0]}`, {
+                          method: 'POST',
+                          credentials: 'include',
+                          body: JSON.stringify({uri: candlesticksData['uri'],}),
+                          cache: 'no-cache',
+                          headers: new Headers({
+                            'content-type': 'application/json'
+                          })
+                        }) :
+                        await fetch(`${window.origin}/api/candlesticks/${candlesticksData['uri']}?timestamp=${candlesticksData.timestamp[0]}`, {
+                          method: 'GET',
+                          credentials: 'include',
+                          cache: 'no-cache',
+                          headers: new Headers({
+                             'content-type': 'application/json'
+                           })
+                         });
+  
+  let historicalCandlesticksData = Object.assign({}, stratData, await klineResponse.json());
 
   if (historicalCandlesticksData.result === false) {
     setAddHistoricalCandlesticksRequest(false);
@@ -128,7 +168,7 @@ export const addHistoricalCandlesticks = async () => {
   }
   candlesticksData.date = historicalCandlesticksData.date.concat(candlesticksData.date);
   candlesticksData.trades = historicalCandlesticksData.trades.concat(candlesticksData.trades);
-  if (sStrategy) {
+  if (!mStrategy) {
     candlesticksData.open = historicalCandlesticksData.open.concat(candlesticksData.open);
     candlesticksData.high = historicalCandlesticksData.high.concat(candlesticksData.high);
     candlesticksData.low = historicalCandlesticksData.low.concat(candlesticksData.low);
@@ -153,6 +193,7 @@ export const addHistoricalCandlesticks = async () => {
   return true;
 }
 
+/*
 let candlestickSource = new EventSource(`${window.origin}/stream/${candlesticksData.symbol}/${candlesticksData.timeframe}`);
 candlestickSource.onmessage = function(event) {
   updateCandlestick(event.data);
@@ -161,7 +202,7 @@ candlestickSource.onmessage = function(event) {
 let tradeSource = new EventSource(`${window.origin}/stream/${document.querySelector("lightweight-performance-chart").dataset.strategy}`);
 tradeSource.onmessage = function(event) {
   updateTrade(event.data);
-};
+};*/
 
 export const updateCandlestick = (data) => {
   pageChart.map(chart => {

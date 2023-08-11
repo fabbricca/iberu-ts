@@ -4,8 +4,8 @@ let RATE_OF_RETURN = 0;
 
 (async function InitializeChart() {
 
-	const serverResponse = await fetch(`${window.origin}/api/user`, {
-		method: 'POST',
+	const serverResponse = await fetch(`${window.origin}/api/users/${document.querySelector('main').dataset.user}`, {
+		method: 'GET',
 		credentials: 'include',
 		cache: 'no-cache',
 		headers: new Headers({

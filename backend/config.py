@@ -33,3 +33,7 @@ class Config(object):
   MAX_CONTENT_LENGTH = 2 * 1024 * 1024
   UPLOAD_EXTENSIONS = ['.jpg', '.png']
   UPLOAD_PATH = os.path.join(basedir, 'app/static/img/avatars')
+  TIMESTAMP_DELAY = 1296000
+  ACCESS_TOKEN_SECRET = os.environ.get('ACCESS_TOKEN_SECRET')
+  REFRESH_TOKEN_SECRET = os.environ.get('REFRESH_TOKEN_SECRET')
+  TUTORIAL_TOKEN_SECRET = os.environ.get('TUTORIAL_TOKEN_SECRET')
