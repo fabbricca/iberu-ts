@@ -28,7 +28,7 @@ function checkTokenValidity(token) {
 export const refreshTokenApi =  async () => {
   if (checkTokenValidity(getAccessToken())) return getAccessToken();
 
-  const serverResponse = await fetch(`${window.origin}/api/token_refresh`, {method: 'GET', 
+  const serverResponse = await fetch(`${window.origin}/api/tokens/token_refresh`, {method: 'GET', 
                                                                             headers: new Headers({
                                                                               'content-type': 'application/json'
                                                                             })});
@@ -39,7 +39,7 @@ export const refreshTokenApi =  async () => {
 }
 
 export const uidTokenApi = async () => {
-  const serverResponse = await fetch(`${window.origin}/api/token_uid`, {method: 'POST'});
+  const serverResponse = await fetch(`${window.origin}/api/tokens/token_uid`, {method: 'POST'});
   let uidTokenApiObj = await serverResponse.json();
   return uidTokenApiObj;
 }
