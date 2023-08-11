@@ -439,7 +439,7 @@
                   <span class="hitem narrow">Close</span>
                   <span class="hitem large">Duration</span>
                   <span class="hitem narrow">P</span>
-                  <span class="hitem">%</span>
+                  <span class="hitem medium">%</span>
                   <span class="hitem narrow">Chart</span>
                 </div>   
                 {% for trade in mse.trades %}
@@ -461,11 +461,11 @@
                       {% endif %}
                     </span>
                     {% if trade.result >= 0 %}
-                      <span class="hitem positive">
+                      <span class="hitem medium positive">
                         {{trade.result}}
                       </span>
                     {% else %}
-                      <span class="hitem negative">
+                      <span class="hitem medium negative">
                         {{trade.result}}
                       </span>
                     {% endif %}

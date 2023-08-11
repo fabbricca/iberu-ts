@@ -9,7 +9,7 @@ from flask import jsonify, request, current_app
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from ..func import validate, bool_param
+from ..func import validate
 
 SECOND_IN_A_DAY = 86400
 TIMEFRAME = [5, 60, 1440]
@@ -25,6 +25,9 @@ def candlesticks(asset):
   asset = asset.upper()
   ending_t = int(request.args.get('timestamp')) if request.args.get('timestamp') else datetime.now().timestamp() - current_app.config['TIMESTAMP_DELAY']
   starting_t = ending_t - current_app.config['TIMESTAMP_DELAY']
+  if starting_t < (datetime.now() - relativedelta(days=150)).timestamp():
+    return jsonify({'result': False,
+                    'message': 'Date too old'})
   if request.method == 'GET':
     timestamp = [t for t, in db.session.query(Candlestick.timestamp).filter((Candlestick.timestamp>=starting_t)&(Candlestick.timestamp<ending_t)\
                                                                             &(Candlestick.timeframe==timeframe)&(Candlestick.symbol==asset))]

@@ -1245,11 +1245,17 @@ footer span {
   margin: 0 7%;
 }
 #earning .hitem {
-  width: 19%;
+  width: 21%;
   margin: 8px 0;
+}
+#earning .hitem:last-child {
+  width: 11%;
 }
 #earning .hitem.narrow {
   width: 12.5%;
+}
+#earning .hitem.medium {
+  width: 19%;
 }
 #earning .hitem.large {
   width: 25%;
