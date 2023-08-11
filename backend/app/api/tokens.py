@@ -36,10 +36,12 @@ def createRefreshToken():
 
 def createTutorialToken():
     try:
-        return jwt.encode(payload={'tokenName': current_user.name,
+        return jwt.encode(payload={'userName': current_user.name,
+                                   'userId': current_user.id,
                                    'tokenVersion': current_user.token}, key=current_app.config['TUTORIAL_TOKEN_SECRET'])
     except:
-        return jwt.encode(payload={'tokenName': 'Iberu-TS user',
+        return jwt.encode(payload={'userName': 'Iberu-TS user',
+                                   'userId': 0,
                                    'tokenVersion': 'UchihaItachi'}, key=current_app.config['TUTORIAL_TOKEN_SECRET'])
 
 
@@ -48,32 +50,32 @@ def revokeRefreshToken(user=current_user):
     db.session.commit()
 
 
-@bp.route('/token_refresh', methods=['GET'])
+@bp.route('/tokens/token_refresh', methods=['GET'])
 def token_refresh():
     token = request.cookies.get('jid')
     if not token:
-        return jsonify({'result': False, 'acessToken': ''})
+        return jsonify({'result': False, 'accessToken': ''})
     try:
         payload = jwt.decode(jwt=token, key=current_app.config['REFRESH_TOKEN_SECRET'], algorithms='HS256')
     except:
-        return jsonify({'result': False, 'acessToken': ''})
+        return jsonify({'result': False, 'accessToken': ''})
 
-    user = User.query.filter(User.name==payload['userName'])
+    user = User.query.filter(User.id==payload['userId'])
 
     if not user:
-        return jsonify({'result': False, 'acessToken': ''})
+        return jsonify({'result': False, 'accessToken': ''})
     
     try:
         if current_user.token != payload['tokenVersion']:
-            return jsonify({'result': False, 'acessToken': ''})
+            return jsonify({'result': False, 'accessToken': ''})
     except:
-        return jsonify({'result': False, 'acessToken': ''})
+        return jsonify({'result': False, 'accessToken': ''})
 
     return jsonify({'result': True, 'accessToken': createAccessToken()})
 
 
 
 
-@bp.route('/token_uid', methods=['POST'])
+@bp.route('/tokens/token_uid', methods=['POST'])
 def token_uid():
     return jsonify({'result': True, 'uidToken': createTutorialToken()})
