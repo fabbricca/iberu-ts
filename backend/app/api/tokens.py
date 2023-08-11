@@ -54,7 +54,7 @@ def token_refresh():
     if not token:
         return jsonify({'result': False, 'acessToken': ''})
     try:
-        payload = jwt.decode(jwt=token, key=config['REFRESH_TOKEN_SECRET'], algorithms='HS256')
+        payload = jwt.decode(jwt=token, key=current_app.config['REFRESH_TOKEN_SECRET'], algorithms='HS256')
     except:
         return jsonify({'result': False, 'acessToken': ''})
 
