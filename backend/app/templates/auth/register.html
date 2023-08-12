@@ -46,6 +46,7 @@
                         {% for error in form.rpassword.errors %}
                             <span class="negative">[{{ error }}]</span>
                         {% endfor %}
+                        {{ form.recaptcha }}
                         <div class="authentication">
                             {{ form.submit(class="iberu-button inverse") }}
                         </div>

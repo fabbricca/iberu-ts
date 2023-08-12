@@ -216,6 +216,11 @@ lightweight-user-chart.loaded {
 /*############################################################################*/
 
 /*########################### Shared classes styles ##########################*/
+.g-recaptcha {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
 .logo {
   height: fit-content;
   padding: 5px 30px 5px 0;
@@ -1022,7 +1027,7 @@ footer span {
   animation-delay: 2600ms;
 }
 #third-step.show{
-  animation-delay: 3200ms;
+  animation-delay: 3000ms;
 }
 
 @keyframes scaleAndFade {

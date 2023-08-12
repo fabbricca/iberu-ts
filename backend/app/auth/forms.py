@@ -1,4 +1,4 @@
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField
 from app.models import User
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
@@ -19,12 +19,8 @@ class RegistrationForm(FlaskForm):
     email = StringField(('Email'), validators=[DataRequired(), Email()])
     password = PasswordField(('Password'), validators=[DataRequired()])
     rpassword = PasswordField(('Repeat Password'), validators=[DataRequired(), EqualTo('password')])
+    recaptcha = RecaptchaField()
     submit = SubmitField(('REGISTER'))
-
-    def validate_username(self, username):
-        user = User.query.filter_by(username=username.data).first()
-        if user is not None:
-            raise ValidationError(('Please use a different username.'))
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()

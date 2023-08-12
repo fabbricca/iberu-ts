@@ -145,7 +145,7 @@ def register():
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.index')
         response = make_response(redirect(next_page))
-        response.set_cookie(key='jid', value=createRefreshToken(), httponly=True)
+        response.set_cookie(key='jid', value=createRefreshToken(), httponly=True, samesite='Strict')
         return response
     return render_template('auth/register.html', title='Register', form=form)
 
