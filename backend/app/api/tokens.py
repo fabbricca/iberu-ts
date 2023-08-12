@@ -57,21 +57,12 @@ def token_refresh():
         return jsonify({'result': False, 'accessToken': ''})
     try:
         payload = jwt.decode(jwt=token, key=current_app.config['REFRESH_TOKEN_SECRET'], algorithms='HS256')
-    except:
-        return jsonify({'result': False, 'accessToken': ''})
-
-    user = User.query.filter(User.id==payload['userId'])
-
-    if not user:
-        return jsonify({'result': False, 'accessToken': ''})
-    
-    try:
-        if current_user.token != payload['tokenVersion']:
+        user = User.query.filter(User.id==payload['userId'])
+        if not user or current_user.token != payload['tokenVersion']:
             return jsonify({'result': False, 'accessToken': ''})
+        return jsonify({'result': True, 'accessToken': createAccessToken()})
     except:
         return jsonify({'result': False, 'accessToken': ''})
-
-    return jsonify({'result': True, 'accessToken': createAccessToken()})
 
 
 

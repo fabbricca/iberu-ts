@@ -230,6 +230,19 @@
               {% endfor %}
             </tbody>
           </table>
+          <nav>
+            <ul class="navbar-items pages">
+              {% for page in context.strategies_earning.iter_pages(left_edge=3, right_edge=3) %}
+                {% if page %}
+                  {% if page==context.strategies_earning.page %}
+                    <li><a class="iberu-button small" href="{{ url_for('main.ssearch', page=page) }}">{{ page }}</a></li>
+                  {% else %}
+                    <li><a class="iberu-button dark small positive" href="{{ url_for('main.ssearch', page=page) }}">{{ page }}</a></li>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </nav>
         </div>
       </div>
     </main>

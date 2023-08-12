@@ -64,39 +64,6 @@ window.onload = function() {
   }
 }
 
-function pageQuery() {
-  if(searchInput.value) {
-    let tableRows = document.querySelector(".strategies-table").querySelector("tbody").querySelectorAll("tr");
-    for(let i=0; i < tableRows.length; i++) {
-      let txtValue = tableRows[i].querySelectorAll("td")[1].textContent || tableRows[i].querySelectorAll("td")[1].innerText;
-      if (txtValue.toLowerCase().indexOf(searchInput.value.toLowerCase()) > -1) {
-        query = true;
-        tableRows[i].classList.remove("hide");
-      }
-      else tableRows[i].classList.add("hide");
-    }
-    return;
-  }
-  else {
-    let tableRows = document.querySelector(".strategies-table").querySelector("tbody").querySelectorAll("tr");
-    for(let i=0; i < tableRows.length; i++) {
-      if(!tableRows[i].classList.contains("query"))
-        tableRows[i].classList.remove("hide");
-      else 
-        tableRows[i].classList.remove("show");
-    }
-    return;
-  }
-}
-
-function hideStrategy(type) {
-  let tableRows = document.querySelector(".strategies-table").querySelector("tbody").querySelectorAll("tr");
-    for(let i=0; i < tableRows.length; i++) {
-      if (tableRows[i].classList.contains(type)) tableRows[i].classList.toggle("hide");
-    }
-    return;
-}
-
 function showThumbnail(n) {
   let slides = document.querySelectorAll(".thumbnail");
   let dots = document.querySelectorAll(".dot");
@@ -206,28 +173,10 @@ if (searchThumbnails) {
 const searchInput = document.querySelector("#search-input");
 const searchForm = document.querySelector("#search-form");
 if (searchForm) {
-  searchInput.onkeyup = () => pageQuery();
   searchForm.onsubmit = async (e) => {
     e.preventDefault();
-    const tableBody = document.querySelector(".strategies-table").querySelector("tbody");
-    let strategyFound = [];
-    tableBody.querySelectorAll("tr").forEach(row => {
-      if (!row.classList.contains("hide")) strategyFound.push(row.querySelectorAll("td")[1].innerText)
-    });
-    const serverResponse = await fetch(`${window.origin}/api/strategy`, {
-      method: 'POST',
-      credentials: 'include',
-      body: JSON.stringify({strategy: searchInput.value,
-                            found: strategyFound,}),
-      cache: 'no-cache',
-      headers: new Headers({
-        'content-type': 'application/json'
-      })
-    });
-
-    let response = await serverResponse.text();
-    tableBody.innerHTML += response;
-    return false;
+    let newUrl = window.location.origin + window.location.pathname + "?strategy=" + searchInput.value;
+    window.location.href = newUrl;
   }
 }
 

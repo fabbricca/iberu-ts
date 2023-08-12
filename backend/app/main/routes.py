@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
 import sqlalchemy as sa
-from sqlalchemy import text
+from sqlalchemy import text, func
 
 from flask import current_app, abort, render_template, redirect, url_for, request, send_from_directory, jsonify
 from flask_login import current_user, login_required
@@ -250,11 +250,13 @@ def user(user):
 @bp.route('/strategies')
 def ssearch():
   data = []
+  page = request.args.get('page', 1, type=int)
+  query_s = request.args.get('strategy', None, type=str)
   initial_t = (datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - relativedelta(months=1)).timestamp()
   strategies = text(f"""SELECT p.id, a.name, p.name, s.trading_type,
-                               (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= {initial_t} AND t.product_id = s.id AND t.percentage >= 0) AS count1,
-                               (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= {initial_t} AND t.product_id = s.id) AS count2,
-                               (SELECT SUM(t.percentage) FROM trade t WHERE t.close_timestamp >= {initial_t} AND t.product_id = s.id) AS sum_percentage,
+                               (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= :initial_t AND t.product_id = s.id AND t.percentage >= 0) AS count1,
+                               (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= :initial_t AND t.product_id = s.id) AS count2,
+                               (SELECT SUM(t.percentage) FROM trade t WHERE t.close_timestamp >= :initial_t AND t.product_id = s.id) AS sum_percentage,
                                p.price
                         FROM (SELECT * FROM topstrategies ORDER BY CASE 
                                                                       WHEN percentage IS NULL THEN 1
@@ -270,7 +272,7 @@ def ssearch():
                                   WHEN sum_percentage IS NULL THEN 1
                                   WHEN sum_percentage < 0 THEN 2
                                   ELSE 0                   
-                                 END, sum_percentage DESC;""").compile()
+                                 END, sum_percentage DESC;""").bindparams(initial_t=initial_t)
   strategies = [r for r in db.engine.execute(strategies)]
   unique_ids = list(set([s[0] for s in strategies]))
   for strategy in strategies:
@@ -282,9 +284,14 @@ def ssearch():
       data[-1]['trading_type'] = TRADING_TYPE[data[-1]['trading_type']]
       if data[-1]['total'] == 0: data[-1]['total'] = 1
       if not data[-1]['performance']: data[-1]['performance'] = 0
-  strategies_e = [s.__json__(assets = True) for s in Strategy.query.filter().order_by(Strategy.rate_of_return.desc()).limit(25)]
+  if query_s:
+    query_s = "%{}%".format(query_s)
+    strategies_e = Strategy.query.filter(func.lower(Strategy.name).like(query_s)).order_by(Strategy.rate_of_return.desc()).paginate(page=page, per_page=current_app.config['STRATEGIES_PER_PAGE'], error_out=False)
+  else:
+    strategies_e = Strategy.query.filter().order_by(Strategy.rate_of_return.desc()).paginate(page=page, per_page=current_app.config['STRATEGIES_PER_PAGE'], error_out=False)
+  strategies_e.items = [s.__json__(assets = True) for s in strategies_e]
   for s in strategies_e:
-      s['trading_type'] = TRADING_TYPE[s['trading_type']]
+    s['trading_type'] = TRADING_TYPE[s['trading_type']]
   context = {
       'current': 1,
       'top_performer': data,
