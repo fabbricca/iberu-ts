@@ -216,9 +216,8 @@ lightweight-user-chart.loaded {
 /*############################################################################*/
 
 /*########################### Shared classes styles ##########################*/
-.g-recaptcha {
-  background-color: var(--color-background);
-  color: var(--color-text);
+.abbr {
+  display: none !important;
 }
 
 .logo {
@@ -356,7 +355,8 @@ lightweight-user-chart.loaded {
   padding: 4px;
 }
 .iberu-button.submit {
-  float: right;
+  display: block;
+  margin: 0 0 0 auto;
 }
 .iberu-button.big.rounded {
   border-radius: 30px;
@@ -607,6 +607,9 @@ nav {
   margin: 0 30px;
   padding: 0;
   flex: 2;
+}
+.pages {
+  background: var(--color-background);
 }
 .navbar-items.pages {
   justify-content: center;
@@ -1473,6 +1476,35 @@ footer span {
   width: 65%;
   margin: 50px 3% 0 30px;
 }
+.user-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 10px;
+  font-size: 14px;
+}
+.user-table {
+  margin: 0 0 30px 0;
+}
+.user-table thead th:nth-child(1) {
+  width: 10%;
+}
+.user-table thead th:nth-child(2) {
+  width: 30%;
+  text-align: left;
+}
+.user-table thead th:nth-child(3),
+.user-table thead th:nth-child(4),
+.user-table thead th:nth-child(5) {
+  width: 20%;
+  text-align: center;
+}
+.user-table tbody td {
+  text-align: center;
+}
+.user-table tbody td:nth-child(2) {
+  text-align: left;
+}
 #user-performance button {
   margin: auto 0 3px 15px;
 }
@@ -1481,8 +1513,9 @@ footer span {
   margin: 20px 0 0 0;
   align-items: baseline;
 }
-#user-balance h2 {
+#user-balance h3 {
   margin: 0 10px 0 0;
+  font-size: 18px;
   font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, sans-serif;
 }
 
@@ -1569,31 +1602,43 @@ footer span {
   text-align: left;
 }
 
-#user-subscription-container .strategies-table {
+.subscriptions-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 10px;
+  font-size: 14px;
+}
+.subscriptions-table {
   margin: 0 0 30px 0;
 }
-#user-subscription-container .strategies-table thead th:nth-child(1) {
+.subscriptions-table thead th:nth-child(1) {
   width: 20%;
   text-align: left;
 }
-#user-subscription-container .strategies-table thead th:nth-child(2),
-#user-subscription-container .strategies-table thead th:nth-child(3) {
+.subscriptions-table thead th:nth-child(2),
+.subscriptions-table thead th:nth-child(3) {
   width: 14%;
+  text-align: center;
 }
-#user-subscription-container .strategies-table thead th:nth-child(4),
-#user-subscription-container .strategies-table thead th:nth-child(5),
-#user-subscription-container .strategies-table thead th:nth-child(6),
-#user-subscription-container .strategies-table thead th:nth-child(8) {
+.subscriptions-table thead th:nth-child(4),
+.subscriptions-table thead th:nth-child(5),
+.subscriptions-table thead th:nth-child(6),
+.subscriptions-table thead th:nth-child(8) {
   width: 8%;
+  text-align: center;
 }
-#user-subscription-container .strategies-table thead th:nth-child(7),
-#user-subscription-container .strategies-table thead th:nth-child(9) {
+.subscriptions-table thead th:nth-child(7),
+.subscriptions-table thead th:nth-child(9) {
   width: 10%;
 }
-#user-subscription-container .strategies-table tbody td:nth-child(1) {
+.subscriptions-table tbody td {
+  text-align: center;
+}
+.subscriptions-table tbody td:nth-child(1) {
   text-align: left;
 }
-#user-subscription-container .strategies-table tbody td input {
+.subscriptions-table tbody td input {
   width: 100%;
   text-align: center;
   background: var(--color-user-background);
@@ -1613,10 +1658,6 @@ footer span {
   border-right-color: var(--color-panel);
   rotate: 90deg;
 }
-#subscription-api,
-#subscription-quote {
-  width: 200%;
-}
 #subscription-quote,
 #subscription-api,
 #user-api-container .info.modal {
@@ -1630,7 +1671,7 @@ footer span {
   left: 50%;
   z-index: 8;
   border-radius: 5px;
-  background: var(--color-panel);
+  background: var(--color-user-panel);
   overflow-y: auto;
 }
 #user-subscription-container .info.modal .vitem,
@@ -1638,7 +1679,7 @@ footer span {
   width: 94%;
   height: fit-content;
   margin: auto;
-  padding: 8px 0 8px 0;
+  padding: 8px 5px 8px 5px;
   color: var(--color-text);
   border-bottom: 1px solid var(--color-background);
 }
@@ -1648,7 +1689,7 @@ footer span {
 }
 #user-subscription-container .info.modal .vitem .hlist,
 #user-api-container .info.modal .vitem .hlist {
-  justify-content: center;
+  justify-content: left;
 }
 #user-subscription-container .info.modal.show,
 #user-api-container .info.modal.show {
@@ -1723,6 +1764,10 @@ footer span {
   width: 25%;
   text-align: left;
 }
+#user-active-api .api-table th:nth-child(3),
+#user-active-api .api-table td:nth-child(3) {
+  padding-left: 8px;
+}
 #user-active-api .api-table thead th:nth-child(2) {
   width: 40%;
   text-align: left;
@@ -1731,12 +1776,16 @@ footer span {
   width: 10%;
   text-align: center;
 }
+#user-active-api .api-table tbody td:nth-child(2) {
+  padding-right: 4px;
+  overflow-x: hidden;
+}
 #user-active-api .api-table tbody td:nth-child(4) {
   text-align: center;
 }
 #user-api-container .info.modal {
-  width: 100%;
-  transform: translate(-50%, 45%);
+  left: 12%;
+  transform: translate(-50%, 50%);
 }
 #user-api-form h2 {
   margin: 30px 0 15px 0;
@@ -1812,7 +1861,14 @@ footer span {
   #strategy-chart {
     width: 100%;
   }
+  #mstrategy-trade {
+    width: 100%;
+  }
   #strategy-earning {
+    width: 100%;
+    height: fit-content;
+  }
+  #mstrategy-earning {
     width: 100%;
     height: fit-content;
   }
@@ -1823,6 +1879,30 @@ footer span {
   #strategy-backtest,
   #strategy-wrapper {
     width: 100%;
+  }
+  /*############################################################################*/
+
+  /*################################ Portfolio #################################*/
+  #user-overview {
+    flex-direction: column;
+  }
+
+  #user-portfolio-container {
+    width: 100%;
+    margin: 50px 0 0 0;
+  }
+
+  #user-suggestions-container {
+      flex-direction: row;
+      margin: 0 0 0 0;
+      width: 100%;
+  }
+  #user-suggestions {
+    flex: 2;
+  }
+  #user-services {
+    flex: 1;
+    margin: 0 2% 20px 2%;
   }
   /*############################################################################*/
 }
@@ -2055,6 +2135,13 @@ footer span {
   }
   /*############################################################################*/
 
+  /*############################## Search Strategy #############################*/
+  .navbar-items.pages {
+    display: block;
+    margin: auto;
+  }
+  /*############################################################################*/
+
   /*################################# Strategy #################################*/
   #strategy-header-container {
     flex-direction: column;
@@ -2078,6 +2165,78 @@ footer span {
   }
   #strategy-buy .iberu-button {
     height: 62px;
+  }
+  /*############################################################################*/
+
+  /*################################ Portfolio #################################*/
+  #user-navbar-container {
+    width: 100%;
+    height: 60px;
+    position: fixed;
+    bottom: 0;
+    z-index: 3;
+    background: var(--color-panel);
+  }
+  #user-navbar-container .vlist {
+    flex-direction: row;
+  }
+  #user-navbar-container .vitem {
+    height: 60px;
+  }
+  #user-navbar-container .vitem.current {
+    background: var(--color-iberu);
+    color: var(--color-text);
+  }
+
+  #user-overview-container {
+    width: 100%;
+  }
+  #user-portfolio-container {
+    width: 96%;
+    margin: 0 2%;
+  }
+  .subscriptions-table thead th {
+    padding: 0 0 10px 0;
+  }
+  .subscriptions-table thead th:nth-child(1),
+  .subscriptions-table tbody tr td:nth-child(1) {
+      width: 22%;
+  }
+  .subscriptions-table thead th:nth-child(2),
+  .subscriptions-table thead th:nth-child(3),
+  .subscriptions-table tbody tr td:nth-child(2),
+  .subscriptions-table tbody tr td:nth-child(3) {
+      width: 0;
+      display: none;
+  }
+  .subscriptions-table thead th:nth-child(4),
+  .subscriptions-table tbody tr td:nth-child(4),
+  .subscriptions-table thead th:nth-child(5),
+  .subscriptions-table tbody tr td:nth-child(5),
+  .subscriptions-table thead th:nth-child(6),
+  .subscriptions-table tbody tr td:nth-child(6),
+  .subscriptions-table thead th:nth-child(7),
+  .subscriptions-table tbody tr td:nth-child(7),
+  .subscriptions-table thead th:nth-child(8),
+  .subscriptions-table tbody tr td:nth-child(8),
+  .subscriptions-table thead th:nth-child(9),
+  .subscriptions-table tbody tr td:nth-child(9) {
+      width: 12.4%;
+  }
+  .subscriptions-table tbody tr td{
+      padding: 10px 0;
+  } 
+  .subscriptions-table .status span{
+    display: none;
+  }
+  #subscription-api {
+    top: 40%;
+  }
+  /*############################################################################*/
+
+  /*################################# Footer ###################################*/
+  footer .hlist:first-of-type {
+    margin: 40px 40px;
   }
   /*############################################################################*/
 }
@@ -2309,17 +2468,64 @@ footer span {
       text-align: left;
   }
   /*############################################################################*/
+
+  /*################################# Portfolio ################################*/
+  #user-main-container h1 {
+    font-size: 38px;
+  }
+  #user-strategies-container h2 {
+    margin: auto;
+  }
+
+  #user-doughnut-container {
+    flex-direction: column;
+  }
+  #user-assets {
+    margin: 0 0 40px 0;
+  }
+  #user-assets, #user-strategies {
+    width: 100%;
+  }
+
+  #user-suggestions-container {
+    flex-direction: column;
+  }
+
+  #user-settings-container .hlist {
+    flex-direction: column;
+  }
+  #user-personal-image .hlist {
+    flex-direction: row;
+    margin: auto;
+  }
+  #user-settings-container h2.vitem {
+    margin: 0 auto 20px auto;
+  }
+  #user-profile-container,
+  #user-advance-container {
+    width: 100%;
+    margin: 0;
+  }
+
+  #subscription-quote {
+    top: 25%;
+  }
+
+  #user-api-container .info.modal {
+    left: 18%;
+  }
+  /*############################################################################*/
 }
 /*############################################################################*/
 
 /*############################# Max Width 500px #############################*/
 @media (max-width: 500px) {
-  /*################################## Footer ##################################*/
-  footer .hlist {
-    flex-direction: column;
+  /*########################### Shared classes styles ##########################*/
+  .abbr {
+    display: inline !important;
   }
-  footer .hitem {
-    margin: 5px 0 !important;
+  .term {
+    display: none;
   }
   /*############################################################################*/
 
@@ -2350,9 +2556,9 @@ footer span {
   /*############################################################################*/
 
   /*################################# Strategy #################################*/
-#strategy-terms-conditions .header {
-  height: fit-content;
-}
+  #strategy-terms-conditions .header {
+    height: fit-content;
+  }
 
   #strategy-doughnut-chart {
     width: 70%;
@@ -2361,6 +2567,41 @@ footer span {
 
   #strategy-chart {
     height: 350px;
+  }
+  /*############################################################################*/
+
+  /*################################# Portfolio ################################*/
+  #user-header-container .thumbnail.current {
+    display: none;
+  }
+  #user-info {
+    width: 100%;
+  }
+  #user-info .hitem {
+    width: 25%;
+    text-align: center;
+  }
+  #user-achievements {
+    width: 0px;
+  }
+
+  #subscription-api {
+    left: 55%;
+  }
+
+  #user-api-container .info.modal {
+    left: 28%;
+  }
+  /*############################################################################*/
+
+  /*################################## Footer ##################################*/
+  footer .hlist {
+    flex-direction: column;
+  }
+  footer .hitem {
+    margin: 5px auto !important;
+    padding: 0;
+    width: fit-content;
   }
   /*############################################################################*/
 }

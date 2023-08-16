@@ -103,9 +103,9 @@
 
       <div id="user-navbar-container" class="column">
         <div class="vlist">
-          <button id="overview" class="vitem current">Overview</button>
-          <button id="subscription" class="vitem">Subscription</button>
-          <button id="settings" class="vitem">Settings</button>
+          <button id="overview" class="vitem current"><span class="term">Overview</span> <i class="fa-solid fa-chart-line fa-lg abbr"></i></button>
+          <button id="subscription" class="vitem"><span class="term">Subscription</span> <i class="fa-solid fa-dollar-sign fa-lg abbr"></i></button>
+          <button id="settings" class="vitem"><span class="term">Settings</span> <i class="fa-solid fa-gear fa-lg abbr"></i></button>
           <button id="api" class="vitem">API</button>
           <button id="logout" class="vitem">Log out</button>
         </div>
@@ -129,7 +129,7 @@
             </div>
           </div>
           <div id="user-achievements">
-            <div class="thumbnail">
+            <div class="thumbnail current">
               <div class="header">
                 <h2>Invite 10 friends to receive 10% discount</h2>
               </div>
@@ -145,7 +145,7 @@
           </div>
         </div>
   
-        <div class="row">
+        <div id="user-overview" class="row">
           <div id="user-portfolio-container" class="column">
             <h1>Portfolio overview</h1>
             <div id="user-performance" class="row">
@@ -165,7 +165,7 @@
     
             <div id="user-strategies-container" class="row">
               <h2>{{ current_user.name }}'s Strategies</h2>
-              <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
+              <table class="user-table" aria-label="Top performing strategies in the last 30 days">
                 <caption class="visually-hidden">This table contains the top performing strategies in the last 30 days
                   ordered by the highest return. For each strategy are provided its trading type, winrate, performance(return) and the price.</caption>
                 <thead>
@@ -174,7 +174,7 @@
                     <th scope="col">Strategy</th>
                     <th scope="col">Type</th>
                     <th scope="col">WR%</th>
-                    <th scope="col">Performance</th>
+                    <th scope="col"><span class="term">Performance</span> <span class="abbr">Perf</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -226,14 +226,14 @@
           <div id="user-suggestions-container">
             <div id="user-suggestions" class="row">
               <h2>Recommended For {{ current_user.name }}</h2>
-              <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
+              <table class="user-table" aria-label="Top performing strategies in the last 30 days">
                 <caption class="visually-hidden">This table contains the top performing strategies in the last 30 days
                   ordered by the highest return. For each strategy are provided its trading type, winrate, performance(return) and the price.</caption>
                 <thead>
                   <tr>
                     <th scope="col">Asset</th>
                     <th scope="col">Strategy</th>
-                    <th scope="col">Performance</th>
+                    <th scope="col"><span class="term">Performance</span> <span class="abbr">Perf</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -320,7 +320,7 @@
         </div>
         <div class="external-container large">
           <h1>User subscriptions</h1>
-          <table class="strategies-table" aria-label="Top performing strategies in the last 30 days">
+          <table class="subscriptions-table" aria-label="Top performing strategies in the last 30 days">
             <caption class="visually-hidden">This table contains the user's last 20 subscription</caption>
             <thead>
               <tr>
@@ -329,7 +329,7 @@
                 <th scope="col">End Period</th>
                 <th scope="col">Status</th>
                 <th scope="col">Capital</th>
-                <th scope="col">Leverage</th>
+                <th scope="col"><span class="term">Leverage</span> <span class="abbr">Lev</span></th>
                 <th scope="col">Asset</th>
                 <th scope="col">Quote</th>
                 <th scope="col">API</th>
@@ -344,13 +344,13 @@
                   {% if s.active == True %}
                     <td>
                       <button class="status positive">
-                        <i class="fa-solid fa-circle positive"></i> Active
+                        <i class="fa-solid fa-circle positive"></i> <span>Active</span>
                       </button>
                     </td>
                   {% else %}
                     <td>
                       <button class="status alert">
-                        <i class="fa-solid fa-circle alert"></i> Stop
+                        <i class="fa-solid fa-circle alert"></i> <span>Stop</span>
                       </button>
                     </td>
                   {% endif %}
@@ -419,7 +419,8 @@
                   <td><a href="{{ url_for('main.ssearch') }}/{{ s.strategy.replace(' ', '%20') }}">{{ s.strategy }}</a></td>
                   <td>{{ s.start }}</td>
                   <td>{{ s.end }}</td>
-                  <td class="negative"><i class="fa-solid fa-circle negative"></i> Expired</td>
+                  <td class="status negative"><i class="fa-solid fa-circle negative"></i> <span>Expired</span></td>
+                  <td>{{ s.capital }}</td>
                   <td>{{ s.leverage }}</td>
                   <td>
                     <div class="hlist">
@@ -441,6 +442,7 @@
                       <img src="{{ s.quote }}" class="icon">
                     </button>
                   </td>
+                  <td>{{ s.api }}</td>
                 </tr>
               {% endfor %}
             </tbody>

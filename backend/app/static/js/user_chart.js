@@ -219,10 +219,10 @@ let RATE_OF_RETURN = 0;
 			this.chartElement.baselines[0].applyOptions({priceScaleId: 'right',
 																										visible: true});
  			if (localStorage.getItem('show-balance') != 'true')
-			 	document.querySelector('#user-balance').innerHTML = `<h2>******* ≈ ****</h2> 
+			 	document.querySelector('#user-balance').innerHTML = `<h3>******* ≈ ****</h3> 
 			 																											 <span class="secondary-info">**********************************</span>`;
 			else 
-				document.querySelector('#user-balance').innerHTML = `<h2>${(RATE_OF_RETURN).toFixed(5)}% ≈ ${(RATE_OF_RETURN).toFixed(2)}$</h2> 
+				document.querySelector('#user-balance').innerHTML = `<h3>${(RATE_OF_RETURN).toFixed(2)}% ≈ ${(RATE_OF_RETURN).toFixed(2)}$</h3> 
 																														 <span class="secondary-info">with an initial investment of 100$</span>`;
 			document.querySelector('lightweight-performance-chart').classList.add('loaded');
 		}
@@ -322,14 +322,14 @@ function initializeBalance() {
 		localStorage.setItem('show-balance', false);
 		document.querySelector('#portfolio-hide-balance').classList.add('hide');
 		document.querySelector('#portfolio-show-balance').classList.remove('hide');
-		document.querySelector('#user-balance').innerHTML = `<h2>******* ≈ ****</h2> 
+		document.querySelector('#user-balance').innerHTML = `<h3>******* ≈ ****</h3> 
 																												 <span class="secondary-info">**********************************</span>`;
 	})
 	document.querySelector('#portfolio-show-balance').addEventListener('click', () => {
 		localStorage.setItem('show-balance', true);
 		document.querySelector('#portfolio-show-balance').classList.add('hide');
 		document.querySelector('#portfolio-hide-balance').classList.remove('hide');
-		document.querySelector('#user-balance').innerHTML = `<h2>${(RATE_OF_RETURN).toFixed(5)}% ≈ ${(RATE_OF_RETURN).toFixed(2)}$</h2> 
+		document.querySelector('#user-balance').innerHTML = `<h3>${(RATE_OF_RETURN).toFixed(2)}% ≈ ${(RATE_OF_RETURN).toFixed(2)}$</h3> 
 																												 <span class="secondary-info">with an initial investment of 100$</span>`;
 	})
 }

@@ -31,9 +31,9 @@ def get_user(user):
                    JOIN subscription s ON s.transaction_id = t.id
                    JOIN strategy st ON t.product_id = st.id
                    JOIN trade tr ON tr.product_id = st.id
-                   WHERE tr.open_timestamp >= s.subscription_timestamp AND tr.open_timestamp < s.unsubscription_timestamp AND u.id = {current_user.id}
+                   WHERE tr.open_timestamp >= s.subscription_timestamp AND tr.open_timestamp < s.unsubscription_timestamp AND u.id = :user
                    GROUP BY tr.percentage, tr.close_timestamp
-                   ORDER BY tr.close_timestamp;""").compile()
+                   ORDER BY tr.close_timestamp;""").bindparams(user=current_user.id)
   data = db.engine.execute(query)
   for r in data:
     trades.append(r[0])
@@ -44,15 +44,15 @@ def get_user(user):
                    JOIN strategy st ON t.product_id = st.id
                    JOIN strategyasset sa ON sa.strategy_id = st.id
                    JOIN asset a ON sa.asset_id = a.id
-                   WHERE u.id = {current_user.id}
-                   GROUP BY a.name;""").compile()
+                   WHERE u.id = :user
+                   GROUP BY a.name;""").bindparams(user=current_user.id)
   assets = {r[0]: r[1] for r in db.engine.execute(query)}
   query = text(f"""SELECT p.name, COUNT(*)
                    FROM transaction t
                    JOIN user u ON t.user_id = u.id
                    JOIN product p ON t.product_id = p.id
-                   WHERE u.id = {current_user.id}
-                   GROUP BY p.name;""").compile()
+                   WHERE u.id = :user
+                   GROUP BY p.name;""").bindparams(user=current_user.id)
   strategies = {r[0]: r[1] for r in db.engine.execute(query)}
   result = {
     "values": trades,

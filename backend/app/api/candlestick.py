@@ -41,7 +41,8 @@ def candlesticks(asset):
                                                                             &(Candlestick.timeframe==timeframe)&(Candlestick.symbol==asset))]
     volume = [v for v, in db.session.query(Candlestick.volume).filter((Candlestick.timestamp>=starting_t)&(Candlestick.timestamp<ending_t)\
                                                                             &(Candlestick.timeframe==timeframe)&(Candlestick.symbol==asset))]
-    result = {'date': timestamp,
+    result = {'result': True,
+              'date': timestamp,
               'open': open,
               'high': high,
               'low': low,
@@ -62,6 +63,7 @@ def candlesticks(asset):
       key = Asset.query.filter(Asset.id==close[0][1]).first()
       close = [c0 for c0, c1 in close]
       dictionary.update({key.name: close})
-    result = {'date': timestamp,
+    result = {'result': True,
+              'date': timestamp,
               'close': dictionary,}
   return jsonify(result)

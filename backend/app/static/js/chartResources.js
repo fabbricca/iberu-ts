@@ -124,6 +124,7 @@ export const getPageChart = () => {
 
 export const addHistoricalCandlesticks = async () => {
   setUpdatingCandlesticksLock(true);
+  console.log(`${window.origin}/api/strategies/${strategyId}?timestamp=${candlesticksData.timestamp[0]}&mstrategy=${mStrategy}`);
   const stratResponse = await fetch(`${window.origin}/api/strategies/${strategyId}?timestamp=${candlesticksData.timestamp[0]}&mstrategy=${mStrategy}`, {
                                         method: 'GET',
                                         credentials: 'include',
@@ -155,6 +156,7 @@ export const addHistoricalCandlesticks = async () => {
                          });
   
   let historicalCandlesticksData = Object.assign({}, stratData, await klineResponse.json());
+  console.log(historicalCandlesticksData)
 
   if (historicalCandlesticksData.result === false) {
     setAddHistoricalCandlesticksRequest(false);
@@ -167,7 +169,7 @@ export const addHistoricalCandlesticks = async () => {
     historicalCandlesticksData.date[i] = timeToLocal(historicalCandlesticksData.date[i]);
   }
   candlesticksData.date = historicalCandlesticksData.date.concat(candlesticksData.date);
-  candlesticksData.trades = historicalCandlesticksData.trades.concat(candlesticksData.trades);
+  if (historicalCandlesticksData.trades) candlesticksData.trades = historicalCandlesticksData.trades.concat(candlesticksData.trades);
   if (!mStrategy) {
     candlesticksData.open = historicalCandlesticksData.open.concat(candlesticksData.open);
     candlesticksData.high = historicalCandlesticksData.high.concat(candlesticksData.high);

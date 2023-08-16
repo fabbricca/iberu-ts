@@ -69,9 +69,9 @@ def index():
   data = []
   initial_t = (datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - relativedelta(months=1)).timestamp()
   strategies = text(f"""SELECT p.id, a.name, p.name, s.trading_type,
-                               (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= {initial_t} AND t.product_id = s.id AND t.percentage >= 0) AS count1,
-                               (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= {initial_t} AND t.product_id = s.id) AS count2,
-                               (SELECT SUM(t.percentage) FROM trade t WHERE t.close_timestamp >= {initial_t} AND t.product_id = s.id) AS sum_percentage,
+                               (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= :initial_t AND t.product_id = s.id AND t.percentage >= 0) AS count1,
+                               (SELECT COUNT(*) FROM trade t WHERE t.close_timestamp >= :initial_t AND t.product_id = s.id) AS count2,
+                               (SELECT SUM(t.percentage) FROM trade t WHERE t.close_timestamp >= :initial_t AND t.product_id = s.id) AS sum_percentage,
                                p.price
                         FROM (SELECT * FROM topstrategies ORDER BY CASE 
                                                                       WHEN percentage IS NULL THEN 1
@@ -87,7 +87,7 @@ def index():
                                   WHEN sum_percentage IS NULL THEN 1
                                   WHEN sum_percentage < 0 THEN 2
                                   ELSE 0                   
-                                 END, sum_percentage DESC;""").compile()
+                                 END, sum_percentage DESC;""").bindparams(initial_t=initial_t)
   strategies = [r for r in db.engine.execute(strategies)]
   unique_ids = list(set([s[0] for s in strategies]))
   for strategy in strategies:
@@ -127,9 +127,10 @@ def user(user):
                                     JOIN asset a1 ON a1.id = sa.asset_id
                                     JOIN asset a2 ON a2.id = s.quote_id
                                     LEFT JOIN api ap ON ap.id = s.api_id
-                                    WHERE t.user_id = {current_user.id} AND s.unsubscription_timestamp > {current_timestamp} 
+                                    WHERE t.user_id = :user AND s.unsubscription_timestamp > :current_timestamp 
                                     GROUP BY t.id, p.name, a1.name, s.subscription_timestamp, s.unsubscription_timestamp,
-                                            s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").compile()
+                                            s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").bindparams(user=current_user.id,\
+                                                                                                                        current_timestamp=current_timestamp)
     data = [r for r in db.engine.execute(active_subscriptions)]
     active_subscriptions = []
     unique_ids = list(set([s[0] for s in data]))
@@ -151,9 +152,10 @@ def user(user):
                                     JOIN asset a1 ON a1.id = sa.asset_id
                                     JOIN asset a2 ON a2.id = s.quote_id
                                     LEFT JOIN api ap ON ap.id = s.api_id
-                                    WHERE t.user_id = {current_user.id} AND s.unsubscription_timestamp <= {current_timestamp} 
+                                    WHERE t.user_id = :user AND s.unsubscription_timestamp <= :current_timestamp 
                                     GROUP BY t.id, p.name, a1.name, s.subscription_timestamp, s.unsubscription_timestamp,
-                                            s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").compile()
+                                            s.preferred_leverage, a2.name, s.active, s.capital, ap.name;""").bindparams(user=current_user.id,\
+                                                                                                                        current_timestamp=current_timestamp)
     data = [r for r in db.engine.execute(ended_subscriptions)]
     ended_subscriptions = []
     unique_ids = list(set([s[0] for s in data]))
@@ -167,6 +169,7 @@ def user(user):
         ended_subscriptions[-1]['end'] = datetime.fromtimestamp(ended_subscriptions[-1]['end']).strftime('%Y-%m-%d %H:%M:%S')
         ended_subscriptions[-1]['quote'] = '/static/img/assets_icons/' + ended_subscriptions[-1]['quote'].lower() + '.png'
     initial_t = (datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - relativedelta(months=1)).timestamp()
+    data = []
     strategies = text(f"""SELECT p.id, a.name, p.name, s.trading_type,
                           (SELECT COUNT(*) FROM trade t
                                           JOIN transaction tr ON tr.product_id = t.product_id
@@ -229,6 +232,7 @@ def user(user):
         'api': api,
         'exchange': exchange,
     }
+    print(data)
     return render_template('user.html', context=context, profile_form=profile_form, password_form=password_form)
   elif request.method == 'PATCH' or request.form.get('_method') == 'PATCH':
     form = EditProfileForm()

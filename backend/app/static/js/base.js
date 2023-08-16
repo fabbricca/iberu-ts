@@ -201,7 +201,7 @@ if (scalpingBtn) {
 
 const userSubscriptionContainer = document.querySelector("#user-subscription-container");
 if (userSubscriptionContainer) {
-  const status = document.querySelectorAll(".status");
+  const status = document.querySelectorAll(".status.positive", ".status.alert");
   status.forEach((el) => {
     el.addEventListener('click', () => {
       const italic = el.querySelector('i');
@@ -211,11 +211,11 @@ if (userSubscriptionContainer) {
       italic.classList.toggle('alert');
       if (el.classList.contains('positive')) {
         el.dataset.value = true;
-        el.innerHTML = '<i class="fa-solid fa-circle positive"></i> Active';
+        el.innerHTML = '<i class="fa-solid fa-circle positive"></i> <span>Active</span>';
       }
       else {
         el.dataset.value = false;
-        el.innerHTML = '<i class="fa-solid fa-circle alert"></i> Stop';
+        el.innerHTML = '<i class="fa-solid fa-circle alert"></i> <span>Stop</span>';
       }
     });
   });

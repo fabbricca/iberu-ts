@@ -341,7 +341,7 @@ import { TOUCH } from '/static/js/chartResources.js'
 					<form>
 						<label for="color-picker-strategy"> 
 							<input type="color" id="color-picker-strategy" value="${candlesticksData.color}" class="color-picker" aria-label="Strategy color picker" disabled></input>
-							Linear Regression
+							${candlesticksData.name}
 						</label>
 					</form>
 					<button id="chart-modal-confirm" class="submit" type="button" aria-label="Confirm settings">Confirm</button>
