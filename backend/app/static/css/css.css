@@ -383,8 +383,18 @@ lightweight-user-chart.loaded {
   background: var(--color-panel);
   color: var(--color-background);
 }
+.iberu-button.warning {
+  background: var(--color-alert);
+  color: var(--color-text);
+}
+.iberu-button.warning:hover {
+  background: var(--color-alert);
+}
 .iberu-button.positive {
   color: var(--color-positive);
+}
+.iberu-button.alert {
+  color: var(--color-alert);
 }
 .iberu-button.negative {
   color: var(--color-negative);
@@ -1602,6 +1612,21 @@ footer span {
   text-align: left;
 }
 
+#user-api-message {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: fit-content;
+  z-index: 5;
+}
+#user-api-message span {
+  margin: 5px;
+  opacity: 0.9;
+}
+#user-api-message i {
+  padding: 0 5px;
+}
 .subscriptions-table {
   table-layout: fixed;
   width: 100%;
@@ -1663,11 +1688,10 @@ footer span {
 #user-api-container .info.modal {
   display: none;
   position: absolute;
-  min-height: 70px;
   max-height: 150px;
-  transform: translate(-50%, 25%);
+  transform: translate(-50%, 0%);
   padding: 0;
-  top: 0;
+  top: 100%;
   left: 50%;
   z-index: 8;
   border-radius: 5px;
@@ -1780,10 +1804,12 @@ footer span {
   padding-right: 4px;
   overflow-x: hidden;
 }
-#user-active-api .api-table tbody td:nth-child(4) {
+#user-active-api .api-table tbody tr td:nth-child(4),
+#user-active-api .api-table tbody tr .delete-api {
   text-align: center;
 }
 #user-api-container .info.modal {
+  top: 50%;
   left: 12%;
   transform: translate(-50%, 50%);
 }
@@ -2351,16 +2377,49 @@ footer span {
     margin: 0 10px 0 0;
     clip-path: polygon(0 8%, 60% 0, 60% 92%, 0 100%);
   }
-  .circle {
-    width: 88%;
-    height: 39.6%;
-    border: 2px solid var(--color-iberu);
-    border-top: 2px solid var(--color-background);
+  .inner.circle,
+  .outer.circle {
+    width: 100% !important;
+    height: 45% !important;
   }
+
+  @keyframes borderAnimation {
+    0% {
+      border-top-color: var(--color-background);
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+      border-left-color: transparent;
+    }
+    24% {
+      border-top-color: var(--color-background);
+      border-right-color: var(--color-iberu-active);
+      border-bottom-color: transparent;
+      border-left-color:  transparent;
+    }
+    48% {
+      border-top-color: var(--color-background);
+      border-right-color: var(--color-iberu-active);
+      border-bottom-color: var(--color-iberu-active);
+      border-left-color:  transparent;
+    }
+    75% {
+      border-top-color: var(--color-background);
+      border-right-color: var(--color-iberu-active);
+      border-bottom-color: var(--color-iberu-active);
+      border-left-color:  var(--color-iberu-active);
+    }
+    100% {
+      border-top-color: var(--color-background);
+      border-right-color: var(--color-iberu-active);
+      border-bottom-color: var(--color-iberu-active);
+      border-left-color:  var(--color-iberu-active);
+    }
+  }
+
   #first-step, 
   #second-step, 
   #third-step {
-    width: 80%;
+    width: 80% !important;
   }
   /*############################################################################*/
 
@@ -2537,9 +2596,9 @@ footer span {
     width: 28%;
     height: 70vw;
   }
-  .circle {
-    width: 92%;
-    height: 32.4%;
+  .inner.circle,
+  .outer.circle {
+    height: 35.5% !important;
   }
   /*############################################################################*/
 

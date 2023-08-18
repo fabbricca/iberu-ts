@@ -2,7 +2,7 @@ from app import db
 from app.api import bp
 from app.models import Indicator, Product, Subscription, Transaction, Asset, Api, Exchange
 
-from ..func import isAuth
+from ..func import isAuth, bool_param
 
 from sqlalchemy.sql import text
 
@@ -71,39 +71,57 @@ def get_user(user):
 @login_required
 def user_subscription(user):
   if not isAuth(request):
-    return jsonify({'result': False})
+    return jsonify({'result': False,
+                    'message': 'Authentication failed. Please log in again'})
   data = request.get_json()
+  check = True
+  messages = []
   for s in data:
     try:
-      strategy = db.session.query(Product.id).filter(Product.name==s['strategy']).first()[0]
+      strategy = Product.query.filter(Product.name==s['strategy']).first()
       transaction = db.session.query(Transaction.id).filter((Transaction.user_id==current_user.id)
-                                                          &(Transaction.product_id==strategy)).order_by(Transaction.timestamp.desc()).first()[0]
+                                                          &(Transaction.product_id==strategy.id)).order_by(Transaction.timestamp.desc()).first()[0]
       subscription = Subscription.query.filter((Subscription.transaction_id==transaction)&(Subscription.unsubscription_timestamp>datetime.now().timestamp())).first()
-      if s['capital']:
-        subscription.capital = int(s['capital'])
-        db.session.commit()
-      if s['leverage']:
-        subscription.preferred_leverage = int(s['leverage']) if int(s['leverage']) < current_app.config['MAX_LEVERAGE'] else current_app.config['MAX_LEVERAGE']
-        db.session.commit()
+      quote = None
+      api = None
+      if s['capital'] and int(s['capital']) < 10:
+        check = False
+        messages.append('The minimum capital is $10')
+      if s['leverage'] and int(s['leverage']) < 1:
+        check = False
+        messages.append('The minimum leverage is 1')
       if s['quote']:
         quote = Asset.query.filter(Asset.name.ilike(s['quote'])).first()
-        if quote and quote.id != subscription.quote_id:
-          subscription.quote_id = quote.id
-          db.session.commit()
+        if not quote:
+          check = False
+          messages.append(f'{quote.name} has not been approved by Iberu-ts devs yet')
       if s['api']:
-        api = Api.query.filter(Api.name==s['api']).first()
-        if api and api.id != subscription.api_id:
-          subscription.api_id = api.id
-          db.session.commit()
-      if s['status']:
-        if s['status'] == 'false':
-          subscription.active = False
-        elif s['status'] == 'true' and subscription.unsubscription_timestamp > datetime.now().timestamp() and subscription.api_id:
-          subscription.active = True
-        db.session.commit()
+        api = Api.query.filter((Api.name==s['api'])&(Api.user_id==current_user.id)).first()
+        if not api:
+          check = False
+          messages.append(f'{api.name} has been deleted')
+      if s['status'] and s['status'] == 'true':
+        if subscription.unsubscription_timestamp <= datetime.now().timestamp():
+          check = False
+          messages.append(f'{strategy.name} subscription is expired')
+        elif not subscription.api_id and not api:
+          check = False
+          messages.append(f'{strategy.name} API missing')
+          print(subscription.api_id)
     except:
-      pass
-  return jsonify({'result': True})
+      messages.append('Something went wrong. Please try again')
+      return jsonify({'result': False,
+                      'messages': messages})
+    if check:
+      if s['capital']: subscription.capital = int(s['capital'])
+      if s['leverage']: subscription.preferred_leverage = int(s['leverage']) if int(s['leverage']) < current_app.config['MAX_LEVERAGE'] else current_app.config['MAX_LEVERAGE']
+      if quote: subscription.quote_id = quote.id
+      if api: subscription.api_id = api.id
+      if s['status']: subscription.active = bool_param(s['status'])
+      db.session.commit()
+  if check: messages.append('Subscriptions updated')
+  return jsonify({'result': check,
+                  'message': messages})
 
 
 
@@ -120,7 +138,7 @@ def user_api(user):
       current_t = datetime.now().timestamp()
       active_subscription = text(f"""UPDATE subscription s
                                       SET s.api_id = NULL, s.active = 0
-                                      WHERE s.api_id = :api AND s.unsubscription_timestamp > :current_t;""").bindparams(api=api.id, current_t=current_t)
+                                      WHERE s.api_id = :api;""").bindparams(api=api.id)
       db.engine.execute(active_subscription)
       db.session.delete(api)
       db.session.commit()

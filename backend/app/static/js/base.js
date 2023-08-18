@@ -125,7 +125,6 @@ if (navThemeBtn) {
 
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
-    console.log(entry);
     if (entry.isIntersecting) entry.target.classList.add('show');
     //else entry.target.classList.remove('show');
   })
@@ -199,9 +198,10 @@ if (scalpingBtn) {
   };
 }
 
+const apiMessage = document.querySelector('#user-api-message');
 const userSubscriptionContainer = document.querySelector("#user-subscription-container");
 if (userSubscriptionContainer) {
-  const status = document.querySelectorAll(".status.positive", ".status.alert");
+  const status = [...document.querySelectorAll(".status.positive"), ...document.querySelectorAll(".status.alert")];
   status.forEach((el) => {
     el.addEventListener('click', () => {
       const italic = el.querySelector('i');
@@ -271,6 +271,21 @@ if (userSubscriptionContainer) {
         'content-type': 'application/json'
       })
     });
+    if (serverResponse.ok) {
+      const jsonResponse = await serverResponse.json();
+      if (jsonResponse.message){
+        apiMessage.innerHTML = '';
+        jsonResponse.message.forEach(msg => {
+          apiMessage.innerHTML += `<span class="vitem iberu-button medium rounded ${jsonResponse.result ? '' : 'warning'}">
+                                    ${jsonResponse.result ? '' : '<i class="negative fa-solid fa-triangle-exclamation"></i>'}${msg}
+                                   </span>`;
+        });
+        apiMessage.classList.remove('hide');
+        setTimeout(() => {
+          apiMessage.classList.add('hide');
+        }, 4000);
+      }
+    }
   })
 }
 
@@ -333,6 +348,19 @@ async function removeApi(el) {
     let apiOptions = el.querySelector('#subscription-api').querySelector('.vlist');
     apiOptions.querySelector(`#api-${btn.dataset.value}`).remove();
   });
+  /*if (serverResponse.ok) {
+    const jsonResponse = await serverResponse.json();
+    apiMessage.innerHTML = '';
+      jsonResponse.message.forEach(msg => {
+        apiMessage.innerHTML += `<span class="vitem iberu-button medium rounded ${jsonResponse.result ? '' : 'warning'}">
+                                  ${jsonResponse.result ? '' : '<i class="negative fa-solid fa-triangle-exclamation"></i>'}${msg}
+                                 </span>`;
+      });
+      apiMessage.classList.remove('hide');
+      setTimeout(() => {
+        apiMessage.classList.add('hide');
+      }, 4000);
+  }*/
 }
 
 
@@ -362,7 +390,6 @@ if (userApiContainer) {
       let div = exchangeBtn.querySelector('.hlist');
       div.innerHTML = '';
       div.appendChild(el.querySelector('.hlist').cloneNode(true));
-      console.log(el.querySelector('.hlist'), div);
       modal.classList.remove('show');
     });
   });
@@ -391,10 +418,9 @@ if (userApiContainer) {
     row.insertCell(0).innerText = apiName;
     row.insertCell(1).innerText = apiKey;
     row.insertCell(2).innerText = apiExchange;
-    row.insertCell(3).innerHTML = `<button class="negative" data-value="${apiName}">
+    row.insertCell(3).innerHTML = `<button class="big negative delete-api" data-value="${apiName}">
                                     <i class="fa-regular fa-trash-can fa-lg"></i>
                                   </button>`;
-
     userSubscriptionContainer.querySelectorAll('.subscription').forEach((el) => {
       let apiOptions = el.querySelector('#subscription-api').querySelector('.vlist');
       apiOptions.innerHTML += `<button class="api vitem big" id="api-${apiName}" data-value="${apiName}">

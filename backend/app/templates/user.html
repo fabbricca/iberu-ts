@@ -100,7 +100,7 @@
     </nav>
 
     <main id="user-main-container" class="row" data-user="{{current_user.id}}">
-
+      <div id="user-api-message" class="hide vlist"></div>
       <div id="user-navbar-container" class="column">
         <div class="vlist">
           <button id="overview" class="vitem current"><span class="term">Overview</span> <i class="fa-solid fa-chart-line fa-lg abbr"></i></button>
@@ -442,7 +442,13 @@
                       <img src="{{ s.quote }}" class="icon">
                     </button>
                   </td>
-                  <td>{{ s.api }}</td>
+                  {% if s.api == None %}
+                    <td class="negative">
+                      Deleted
+                    </td>
+                  {% else %}
+                    <td>{{ s.api }}</td>
+                  {% endif %}
                 </tr>
               {% endfor %}
             </tbody>
@@ -518,7 +524,7 @@
                     <td>{{ a.api_key_hash }}</td>
                     <td>{{ a.exchange.name }}</td>
                     <td>
-                      <button class="negative" data-value="{{ a.name }}">
+                      <button class="delete-api big negative" data-value="{{ a.name }}">
                         <i class="fa-regular fa-trash-can fa-lg"></i>
                       </button>
                     </td>

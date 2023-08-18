@@ -1,0 +1,12 @@
+https://www.reddit.com/r/algotrading/comments/15tarn7/looking_for_a_few_quantminded_people_to_connect/
+
+Hello everyone,
+
+I came across this conversation and noticed that some of you might not be entirely comfortable with coding your own trading strategies. I understand that mastering a programming language to thoroughly backtest a strategy can be quite challenging. If anyone is interested and has a strategy (whether it's already coded or just an idea) I'd be happy to assist by performing free backtests.
+
+Feel free to DM me if you're interested. I want to emphasize that the purpose of this service is purely educational and informational. The results are not intended for actual trading decisions without thorough personal research and analysis.
+
+If you have any questions about the process or would like to learn more, don't hesitate to reach out. I'm here to help!
+
+Best regards,
+Iberu
