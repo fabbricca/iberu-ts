@@ -1809,7 +1809,7 @@ footer span {
   text-align: center;
 }
 #user-api-container .info.modal {
-  top: 50%;
+  top: 0;
   left: 12%;
   transform: translate(-50%, 50%);
 }
@@ -2567,7 +2567,7 @@ footer span {
   }
 
   #subscription-quote {
-    top: 25%;
+    top: 80%;
   }
 
   #user-api-container .info.modal {
