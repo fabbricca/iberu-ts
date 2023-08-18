@@ -289,7 +289,7 @@ def ssearch():
       if data[-1]['total'] == 0: data[-1]['total'] = 1
       if not data[-1]['performance']: data[-1]['performance'] = 0
   if query_s:
-    query_s = "%{}%".format(query_s)
+    query_s = "%{}%".format(query_s.lower())
     strategies_e = Strategy.query.filter(func.lower(Strategy.name).like(query_s)).order_by(Strategy.rate_of_return.desc()).paginate(page=page, per_page=current_app.config['STRATEGIES_PER_PAGE'], error_out=False)
   else:
     strategies_e = Strategy.query.filter().order_by(Strategy.rate_of_return.desc()).paginate(page=page, per_page=current_app.config['STRATEGIES_PER_PAGE'], error_out=False)
