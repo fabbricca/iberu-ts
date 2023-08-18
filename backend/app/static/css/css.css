@@ -2645,6 +2645,7 @@ footer span {
   }
 
   #subscription-api {
+    top: 80%;
     left: 55%;
   }
 
