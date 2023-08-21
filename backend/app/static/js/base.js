@@ -289,6 +289,54 @@ if (userSubscriptionContainer) {
   })
 }
 
+
+const userBacktestContainer = document.querySelector('#user-backtest-container');
+if (userBacktestContainer) {
+  const pdfLinks = document.querySelectorAll('.backtest-pdf');
+
+pdfLinks.forEach(link => {
+  link.addEventListener('click', async event => {
+    event.preventDefault();  // Prevent the default link behavior
+    
+    const token = await refreshTokenApi();
+    if (!token) return;
+
+    try {
+      const response = await fetch(`/download?file=${encodeURIComponent(link.dataset.value)}`, {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-cache',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const filename = `${link.dataset.value}.pdf`;
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.style.display = 'none';
+        downloadLink.href = url;
+        downloadLink.download = filename;
+        downloadLink.type = 'application/pdf';
+
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        URL.revokeObjectURL(url);
+      } else {
+        console.error('Download failed:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('An error occurred:', error);
+    }
+  });
+});
+}
+
+
 const token = await refreshTokenApi();
 const dropzone = document.querySelector('#dropzone-form');
 if (dropzone) {
@@ -456,53 +504,73 @@ if (logOutBtn) {
     window.location.href = `${window.location.origin}/auth/logout`;
   })
 }
-///////////////////////SCRITTO MALE
-const userOverviewPage = document.querySelector('#user-overview-container');
+
+
+const userOverviewContainer = document.querySelector('#user-overview-container');
 const userOverviewButton = document.querySelector('#overview');
-const userSubscriptionPage = document.querySelector('#user-subscription-container');
 const userSubscriptionButton = document.querySelector('#subscription');
-const userSettingsPage = document.querySelector('#user-settings-container');
+const userBacktestButton = document.querySelector('#backtest');
+const userSettingsContainer = document.querySelector('#user-settings-container');
 const userSettingsButton = document.querySelector('#settings');
-const userApiPage = document.querySelector('#user-api-container');
 const userApiButton = document.querySelector('#api');
 
 if (userOverviewButton) {
   userOverviewButton.addEventListener('click', () => {
-    userOverviewPage.classList.remove('hide');
-    userSubscriptionPage.classList.add('hide');
-    userSettingsPage.classList.add('hide');
-    userApiPage.classList.add('hide');
+    userOverviewContainer.classList.remove('hide');
+    userBacktestContainer.classList.add('hide');
+    userSubscriptionContainer.classList.add('hide');
+    userSettingsContainer.classList.add('hide');
+    userApiContainer.classList.add('hide');
     userOverviewButton.classList.add('current');
+    userBacktestButton.classList.remove('current');
     userSubscriptionButton.classList.remove('current');
     userSettingsButton.classList.remove('current');
     userApiButton.classList.remove('current');
   });
   userSubscriptionButton.addEventListener('click', () => {
-    userSubscriptionPage.classList.remove('hide');
-    userOverviewPage.classList.add('hide');
-    userSettingsPage.classList.add('hide');
-    userApiPage.classList.add('hide');
+    userSubscriptionContainer.classList.remove('hide');
+    userBacktestContainer.classList.add('hide');
+    userOverviewContainer.classList.add('hide');
+    userSettingsContainer.classList.add('hide');
+    userApiContainer.classList.add('hide');
     userSubscriptionButton.classList.add('current');
+    userBacktestButton.classList.remove('current');
+    userOverviewButton.classList.remove('current');
+    userSettingsButton.classList.remove('current');
+    userApiButton.classList.remove('current');
+  });
+  userBacktestButton.addEventListener('click', () => {
+    userBacktestContainer.classList.remove('hide');
+    userSubscriptionContainer.classList.add('hide');
+    userOverviewContainer.classList.add('hide');
+    userSettingsContainer.classList.add('hide');
+    userApiContainer.classList.add('hide');
+    userBacktestButton.classList.add('current');
+    userSubscriptionButton.classList.remove('current');
     userOverviewButton.classList.remove('current');
     userSettingsButton.classList.remove('current');
     userApiButton.classList.remove('current');
   });
   userSettingsButton.addEventListener('click', () => {
-    userSettingsPage.classList.remove('hide');
-    userSubscriptionPage.classList.add('hide');
-    userOverviewPage.classList.add('hide');
-    userApiPage.classList.add('hide');
+    userSettingsContainer.classList.remove('hide');
+    userBacktestContainer.classList.add('hide');
+    userSubscriptionContainer.classList.add('hide');
+    userOverviewContainer.classList.add('hide');
+    userApiContainer.classList.add('hide');
     userSettingsButton.classList.add('current');
+    userBacktestButton.classList.remove('current');
     userOverviewButton.classList.remove('current');
     userSubscriptionButton.classList.remove('current');
     userApiButton.classList.remove('current');
   });
   userApiButton.addEventListener('click', () => {
-    userApiPage.classList.remove('hide');
-    userSubscriptionPage.classList.add('hide');
-    userOverviewPage.classList.add('hide');
-    userSettingsPage.classList.add('hide');
+    userApiContainer.classList.remove('hide');
+    userBacktestContainer.classList.add('hide');
+    userSubscriptionContainer.classList.add('hide');
+    userOverviewContainer.classList.add('hide');
+    userSettingsContainer.classList.add('hide');
     userApiButton.classList.add('current');
+    userBacktestButton.classList.remove('current');
     userOverviewButton.classList.remove('current');
     userSubscriptionButton.classList.remove('current');
     userSettingsButton.classList.remove('current');

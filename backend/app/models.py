@@ -342,8 +342,7 @@ class Backtest(Product, db.Model):
   maximum_drawdown = db.Column(db.Float, default=0)
   accuracy = db.Column(db.Float, default=0)
   max_shares = db.Column(db.Float, default=1)
-  pdf = db.Column(db.String(256))
-  user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+  accepted = db.Column(db.Boolean, default=False)
 
   performance = composite(Performance, time_range, frequency, winrate, rate_of_return, holding_period, average_win, average_loss,\
                           sharpe_ratio, maximum_drawdown, accuracy, max_shares)

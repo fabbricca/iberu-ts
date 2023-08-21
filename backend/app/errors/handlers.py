@@ -11,6 +11,18 @@ def wants_json_response():
 
 
 
+@bp.app_errorhandler(400)
+def bad_request(error):
+    if wants_json_response():
+        return api_error_response(400)
+    context = {
+        'current': 0,
+    }
+    return render_template('errors/400.html', context=context), 400
+
+
+
+
 @bp.app_errorhandler(404)
 def not_found_error(error):
     if wants_json_response():

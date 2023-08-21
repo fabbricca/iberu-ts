@@ -1,7 +1,7 @@
 from app import db
 from app.main import bp
 from app.main.forms import EditProfileForm, ChangePasswordRequestForm
-from app.models import Api, Asset, Backtest, Candlestick, Country, Creator, Crypto, Exchange, Indicator, Strategy, StrategyAsset, StrategyIndicator, Trade, User
+from app.models import Api, Asset, Backtest, Candlestick, Country, Creator, Crypto, Exchange, Indicator, Strategy, StrategyAsset, StrategyIndicator, Trade, Transaction, User
 
 from .classes import MonthStrategyEarning
 
@@ -12,7 +12,7 @@ from datetime import datetime
 import sqlalchemy as sa
 from sqlalchemy import text, func
 
-from flask import current_app, abort, render_template, redirect, url_for, request, send_from_directory, jsonify
+from flask import current_app, abort, render_template, redirect, url_for, request, send_from_directory, jsonify, send_file
 from flask_login import current_user, login_required
 
 from werkzeug.utils import secure_filename
@@ -114,10 +114,17 @@ def user(user):
   if user != current_user.id:
     abort(404)
   elif request.method == 'GET':
-    referral_code = current_user.name + '#' + str(ord(current_user.surname[0])) + str(ord(current_user.name[-1]))
+    referral_code = current_user.name.lower() + '!' + str(current_user.id)
     invites = db.session.query(sa.func.count(User.invite)).filter(User.invite==current_user.id).first()[0]
     current_timestamp = datetime.now().timestamp()
     discount = invites if invites < 5 else 5 + 0.25 * (invites - 5)
+    backtests = text("""SELECT b.id, p.name, p.active, b.winrate, b.rate_of_return, b.accepted
+                        FROM transaction t
+                        JOIN backtest b ON t.product_id = b.id
+                        JOIN product p ON p.id = b.id
+                        WHERE t.user_id = :user;""").bindparams(user=current_user.id)
+    backtests = [dict(zip(['id', 'backtest', 'status', 'winrate', 'ror', 'accepted'], r)) for r in db.engine.execute(backtests)]
+    available_backtests = Transaction.query.filter((Transaction.user_id==current_user.id)&(Transaction.product_id.is_(None))).with_entities(func.count()).scalar()
     active_subscriptions = text(f"""SELECT t.id, p.name as strategy, a1.name, s.subscription_timestamp as start, s.unsubscription_timestamp as end, 
                                     s.preferred_leverage as leverage, a2.name as quote, s.active, s.capital, ap.name
                                     FROM transaction t
@@ -226,13 +233,14 @@ def user(user):
         'referral_code': referral_code,
         'invites': invites,
         'discount': discount if discount < 10 else 10,
+        'backtests': backtests,
+        'available_backtests': available_backtests,
         'active_subscriptions': active_subscriptions,
         'ended_subscriptions': ended_subscriptions,
         'strategies_earning': data,
         'api': api,
         'exchange': exchange,
     }
-    print(data)
     return render_template('user.html', context=context, profile_form=profile_form, password_form=password_form)
   elif request.method == 'PATCH' or request.form.get('_method') == 'PATCH':
     form = EditProfileForm()
@@ -392,14 +400,37 @@ def strategy(name):
 
 
 
+@bp.route('/backtest', methods=['GET', 'POST'])
+def backtest():
+  if request.method == 'POST':
+    uploaded_files = request.files.getlist('files')
+    path = os.path.join(current_app.config['STRATEGIES_UPLOAD_PATH'], str(current_user.id))
+    os.makedirs(path, exist_ok=True)
+    for uploaded_file in uploaded_files:
+      filename = secure_filename(uploaded_file.filename)
+      if filename:
+        file_ext = os.path.splitext(filename)[1]
+        if os.path.exists(os.path.join(path, filename)):
+          return render_template('errors/400.html', context={'current':0}), 400
+        if file_ext not in current_app.config['STRATEGIES_UPLOAD_EXTENSIONS']:
+          return render_template('errors/400.html', context={'current':0}), 400
+        if uploaded_file.content_length > current_app.config['MAX_STRATEGIES_CONTENT_LENGTH']:
+          return render_template('errors/413.html', context={'current':0}), 413
+        uploaded_file.save(os.path.join(path, filename))
+    return redirect(url_for('main.backtest'))
+  return render_template('backtest.html', context={'current': 2})
+   
+
+
+
 @bp.route('/users/<int:user>/avatar', methods=['GET', 'POST', 'DELETE'])
 @login_required
 def avatar(user):
   if request.method == 'GET':
-    for ext in current_app.config['UPLOAD_EXTENSIONS']:
+    for ext in current_app.config['IMAGE_UPLOAD_EXTENSIONS']:
       avatar_filename = f"{current_user.id}{ext}"
-      if os.path.exists(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename)):
-        return send_from_directory(current_app.config['UPLOAD_PATH'], avatar_filename)
+      if os.path.exists(os.path.join(current_app.config['AVATAR_UPLOAD_PATH'], avatar_filename)):
+        return send_from_directory(current_app.config['AVATAR_UPLOAD_PATH'], avatar_filename)
     return redirect(current_user.avatar(128))
   elif not isAuth(request):
     return jsonify({'result': False,
@@ -408,15 +439,17 @@ def avatar(user):
     uploaded_file = request.files['file']
     filename = secure_filename(uploaded_file.filename)
     if filename != '':
-        for ext in current_app.config['UPLOAD_EXTENSIONS']:
+        if uploaded_file.content_length > current_app.config['MAX_AVATAR_CONTENT_LENGTH']:
+           return "Invalid image dimension", 413
+        for ext in current_app.config['IMAGE_UPLOAD_EXTENSIONS']:
           avatar_filename = f"{current_user.id}{ext}"
-          if os.path.exists(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename)):
-            os.remove(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename))
+          if os.path.exists(os.path.join(current_app.config['AVATAR_UPLOAD_PATH'], avatar_filename)):
+            os.remove(os.path.join(current_app.config['AVATAR_UPLOAD_PATH'], avatar_filename))
         file_ext = os.path.splitext(filename)[1]
-        if file_ext not in current_app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(uploaded_file.stream):
+        if file_ext not in current_app.config['IMAGE_UPLOAD_EXTENSIONS'] or file_ext != validate_image(uploaded_file.stream):
             return "Invalid image", 400
-        uploaded_file.save(os.path.join(current_app.config['UPLOAD_PATH'], str(current_user.id) + file_ext))
-        image = Image.open(os.path.join(current_app.config['UPLOAD_PATH'], str(current_user.id) + file_ext))
+        uploaded_file.save(os.path.join(current_app.config['AVATAR_UPLOAD_PATH'], str(current_user.id) + file_ext))
+        image = Image.open(os.path.join(current_app.config['AVATAR_UPLOAD_PATH'], str(current_user.id) + file_ext))
         if image.width <= image.height:
           crop = (image.height - image.width) / 2
           crop_area = (0, crop, image.width, image.height - crop)
@@ -424,15 +457,33 @@ def avatar(user):
           crop = (image.width - image.height) / 2
           crop_area = (crop, 0, image.width - crop, image.height)
         cropped_image = image.crop(crop_area)
-        cropped_image.save(os.path.join(current_app.config['UPLOAD_PATH'], str(current_user.id) + file_ext))  
+        cropped_image.save(os.path.join(current_app.config['AVATAR_UPLOAD_PATH'], str(current_user.id) + file_ext))  
     return redirect(url_for('main.user', user=current_user.id))
   elif request.method == 'DELETE':
-    for ext in current_app.config['UPLOAD_EXTENSIONS']:
+    for ext in current_app.config['IMAGE_UPLOAD_EXTENSIONS']:
       avatar_filename = f"{current_user.id}{ext}"
-      if os.path.exists(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename)):
-          os.remove(os.path.join(current_app.config['UPLOAD_PATH'], avatar_filename))
+      if os.path.exists(os.path.join(current_app.config['AVATAR_UPLOAD_PATH'], avatar_filename)):
+          os.remove(os.path.join(current_app.config['AVATAR_UPLOAD_PATH'], avatar_filename))
     return redirect(url_for('main.user', user=current_user.id))
+    
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
+
+
+@bp.route('/download', methods=['GET'])
+def download_file():
+    file = request.args.get('file', None, type=str)
+    if not file:
+        return jsonify({"result": False}), 400
+    try:
+        file += '.pdf'
+        file_path = f'static/pdf/{current_user.id}/{file}'
+        logging.debug(f"File path: {file_path}")
+        return send_file(file_path, as_attachment=True, download_name=file, mimetype='application/pdf')
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        return jsonify({"result": False}), 400
     
 
 

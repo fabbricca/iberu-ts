@@ -30,9 +30,12 @@ class Config(object):
   GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
   GOOGLE_DISCOVERY_URL = ('https://accounts.google.com/.well-known/openid-configuration')
   MAX_LEVERAGE = 5
-  MAX_CONTENT_LENGTH = 2 * 1024 * 1024
-  UPLOAD_EXTENSIONS = ['.jpg', '.png']
-  UPLOAD_PATH = os.path.join(basedir, 'app/static/img/avatars')
+  MAX_AVATAR_CONTENT_LENGTH = 2 * 1024 * 1024
+  MAX_STRATEGIES_CONTENT_LENGTH = 5 * 1024 * 1024
+  IMAGE_UPLOAD_EXTENSIONS = ['.jpg', '.png']
+  AVATAR_UPLOAD_PATH = os.path.join(basedir, 'app/static/img/avatars')
+  STRATEGIES_UPLOAD_EXTENSIONS = ['.py', '.c', '.cpp', '.txt']
+  STRATEGIES_UPLOAD_PATH = os.path.join(basedir, 'app/static/strategies')
   TIMESTAMP_DELAY = 1296000
   ACCESS_TOKEN_SECRET = os.environ.get('ACCESS_TOKEN_SECRET')
   REFRESH_TOKEN_SECRET = os.environ.get('REFRESH_TOKEN_SECRET')

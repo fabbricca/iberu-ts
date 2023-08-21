@@ -36,10 +36,7 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        if '@' in form.username.data:
-            user = User.query.filter_by(email=form.username.data).first()
-        else:
-            user = User.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(email=form.username.data.lower()).first()
 
         if not user or not user.check_password(form.password.data):
             flash('Invalid username or password')
@@ -68,7 +65,7 @@ def google():
     authorization_endpoint = google_provider_cfg['authorization_endpoint']
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
-        redirect_uri = request.base_url + "/callback",
+        redirect_uri = request.base_url + "/callback" + request.args.get('invite', '', type=str),
         scope=["openid", "email", "profile"],
     )
     return redirect(request_uri)
@@ -104,7 +101,16 @@ def callback():
         return "User email not available or not verified by Google.", 400
     user = User.query.filter(User.email==users_email).first()
     if not user:
-        db.session.add(User(username=users_name, email=users_email))
+        invite = request.args.get('invite', None, type=str)
+        if invite:
+          invite_name, invite_id = invite.split("!")
+          invite = User.query.filter((User.id==invite_id)&(User.name.ilike(invite_name))).first()
+          if isinstance(invite, User):
+            db.session.add(User(name=users_name, email=users_email, invite=invite.id))
+          else:
+            db.session.add(User(name=users_name, email=users_email))
+        else:
+          db.session.add(User(name=users_name, email=users_email))
         db.session.commit()
         user = User.query.filter(User.email==users_email).first()
     login_user(user)
@@ -130,24 +136,30 @@ def logout():
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(name=form.name.data,\
-            surname=form.surname.data, email=form.email.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Congratulations, you are now a registered user!')
-        login_user(user)
-        next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('main.index')
-        response = make_response(redirect(next_page))
-        response.set_cookie(key='jid', value=createRefreshToken(), httponly=True, samesite='Strict')
-        return response
-    return render_template('auth/register.html', title='Register', form=form)
+  if current_user.is_authenticated:
+      return redirect(url_for('main.index'))
+  invite = request.args.get('invite', None, type=str)
+  if invite:
+    invite_name, invite_id = invite.split("!")
+    invite = User.query.filter((User.id==invite_id)&(User.name.ilike(invite_name))).first()
+  form = RegistrationForm()
+  if form.validate_on_submit():
+    if isinstance(invite, User):
+      user = User(name=form.name.data, surname=form.surname.data, email=form.email.data, invite=invite.id)
+    else:
+      user = User(name=form.name.data, surname=form.surname.data, email=form.email.data)
+    user.set_password(form.password.data)
+    db.session.add(user)
+    db.session.commit()
+    flash('Congratulations, you are now a registered user!')
+    login_user(user)
+    next_page = request.args.get('next')
+    if not next_page or url_parse(next_page).netloc != '':
+        next_page = url_for('main.index')
+    response = make_response(redirect(next_page))
+    response.set_cookie(key='jid', value=createRefreshToken(), httponly=True, samesite='Strict')
+    return response
+  return render_template('auth/register.html', form=form, invite=f'?{invite.name.lower()}!{invite.id}' if isinstance(invite, User) else None)
 
 
 

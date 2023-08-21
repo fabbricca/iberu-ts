@@ -41,11 +41,11 @@
           {% endif %}
           {% if context.current == 2 %}
             <li>
-              <a href="{{ url_for('main.ssearch')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
+              <a href="{{ url_for('main.backtest')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
             </li>
           {% else %}
             <li>
-              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-at"></i> Backtest</a>
+              <a href="{{ url_for('main.backtest')}}"><i class="fa-solid fa-at"></i> Backtest</a>
             </li>
           {% endif %}
           {% if context.current == 3 %}

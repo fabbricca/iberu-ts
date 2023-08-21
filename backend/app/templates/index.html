@@ -33,11 +33,11 @@
           {% endif %}
           {% if context.current == 2 %}
             <li>
-              <a href="{{ url_for('main.ssearch')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
+              <a href="{{ url_for('main.backtest')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
             </li>
           {% else %}
             <li>
-              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-at"></i> Backtest</a>
+              <a href="{{ url_for('main.backtest')}}"><i class="fa-solid fa-at"></i> Backtest</a>
             </li>
           {% endif %}
           {% if context.current == 3 %}
@@ -194,7 +194,7 @@
               <div class="outer circle"></div>
             </div>
             <section>
-              <h2>CREATORS POOL</h2>
+              <h2>Creators pool</h2>
               <p class="secondary-info">Iberu-TS's creator pool is a group of individuals who develop the systematic trading strategies you can find on our platform. Their experience is evaluated based on both the quality of the strategies they provide and their educational background.
               </p>
             </section>
@@ -208,7 +208,7 @@
               <div class="outer circle"></div>
             </div>
             <section>
-              <h2>BACKTEST</h2>
+              <h2>Backtest</h2>
               <p class="secondary-info">In order to ensure that our users are provided with only profitable strategies, we conduct various tests, such as out-of-sample backtests, walk-forward analyses, and Monte Carlo simulations. We continue to monitor the performance of all strategies once they are live in order to improve our services, and ensure that they remain up-to-date.
               </p>
             </section>
@@ -222,7 +222,7 @@
               <div class="outer circle"></div>
             </div>
             <section>
-              <h2>STRATEGIES</h2>
+              <h2>Strategies</h2>
               <p class="secondary-info">Strategies that meet our criteria will undergo an incubation period during which we run live tests to obtain additional evidence of their actual performance. Only the strategies that continue to fulfill our benchmark will be eligible for inclusion on the Iberu-TS marketplace.
               </p>
             </section>

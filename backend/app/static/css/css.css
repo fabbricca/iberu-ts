@@ -112,7 +112,8 @@ input[type="checkbox"]:focus-visible {
 
 /*########################### Shared element styles ##########################*/
 h1 {
-  font-size: 24px;
+  font-size: 30px;
+  font-weight: 500;
 }
 h2 {
   font-size: 18px;
@@ -212,6 +213,15 @@ lightweight-user-chart.loaded {
 #user-image.big {
   width: 64px;
   height: 64px;
+}
+
+#dropzone-form {
+  min-height: 0px;
+  margin: 0 0 10px 0;
+  border: none;
+}
+#dropzone-form .dz-message {
+  margin: 0 !important;
 }
 /*############################################################################*/
 
@@ -588,13 +598,44 @@ lightweight-user-chart.loaded {
   color: var(--color-text);
 }
 
-#dropzone-form {
-  min-height: 0px;
-  margin: 0 0 10px 0;
-  border: none;
+.card {
+  width: 33%;
+  margin-top: 2%;
+  box-shadow: 1px 1px 20px var(--color-shadow);
+  text-align: center;
+  transition: 0.5s;
 }
-#dropzone-form .dz-message {
-  margin: 0 !important;
+.card:hover {
+  background: var(--color-iberu);
+  color: var(--color-background);
+  box-shadow: 0 0 15px var(--color-iberu-active);
+  transform: scale(1.1);
+  z-index: 1;
+}
+.card .title {
+  font-size: 18px;
+  line-height: 3;
+}
+.card .circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid var(--color-iberu);
+  margin: 5% auto 0 auto;
+  text-align: center;
+}
+.card:hover .circle {
+  border: 2px solid var(--color-background);
+}
+.card .header {
+  font-size: 38px;
+  margin: 35px auto;
+}
+.card .body {
+  margin-top: 10%;
+}
+.card:hover .positive {
+  color: var(--color-background);
 }
 /*############################################################################*/
 
@@ -736,12 +777,12 @@ footer span {
 }
 #homepage-registration h1 {
   font-size: 54px;
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: 25px;
 }
 #homepage-registration h2 {
   text-align: left;
-  font-weight: 400;
+  font-weight: 300;
   margin-bottom: 15px;
 }
 #homepage-registration #google-logo {
@@ -825,6 +866,7 @@ footer span {
 #homepage-strategies-container h1 {
   margin: 100px 0 30px 0;
   font-size: 30px;
+  font-weight: 500;
   text-align: center;
 }
 
@@ -836,6 +878,7 @@ footer span {
 #homepage-steps-container h1 {
   margin: 70px 0 40px 0;
   font-size: 30px;
+  font-weight: 500;
   text-align: center;
 }
 #homepage-steps-container .column {
@@ -848,6 +891,7 @@ footer span {
 #homepage-steps-container section h2{
   margin: 0 0 8px 0;
   font-size: 19px;
+  font-weight: 500;
   text-align: center;
   letter-spacing: 2px;
 }
@@ -1052,6 +1096,20 @@ footer span {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
+}
+/*############################################################################*/
+
+/*################################# Backtest #################################*/
+#backtest-options {
+  width: 900px;
+  margin: 5% auto;
+}
+
+#backtest-options .vlist {
+  margin: 25px auto;
+}
+#backtest-options .vitem {
+  margin: 10px auto;
 }
 /*############################################################################*/
 
@@ -1378,7 +1436,7 @@ footer span {
 #user-main-container h1 {
   margin: 10px 0 30px 0;
   font-size: 48px;
-  font-weight: 300;
+  font-weight: 500;
 }
 #user-main-container h2 {
   font-size: 24px;
@@ -1718,6 +1776,35 @@ footer span {
 #user-subscription-container .info.modal.show,
 #user-api-container .info.modal.show {
   display: block !important;
+}
+
+.backtests-table {
+  margin: 0 0 30px 0;
+}
+.backtests-table thead th:nth-child(1) {
+  width: 30%;
+  text-align: left;
+}
+.backtests-table thead th:nth-child(2),
+.backtests-table tbody td:nth-child(2),
+.backtests-table thead th:nth-child(3),
+.backtests-table tbody td:nth-child(3),
+.backtests-table thead th:nth-child(4),
+.backtests-table tbody td:nth-child(4),
+.backtests-table thead th:nth-child(5),
+.backtests-table tbody td:nth-child(5) {
+  width: 15%;
+  text-align: center;
+}
+.backtests-table thead th:nth-child(6) {
+  width: 10%;
+  text-align: center;
+}
+.backtests-table tbody td {
+  text-align: center;
+}
+.backtests-table tbody td:nth-child(1) {
+  text-align: left;
 }
 
 #user-settings-container {
@@ -2644,6 +2731,18 @@ footer span {
     width: 0px;
   }
 
+  .subscriptions-table thead th:nth-child(7),
+  .subscriptions-table tbody tr td:nth-child(7) {
+    width: 0;
+    display: none;
+  }
+
+  .backtests-table thead th:nth-child(5),
+  .backtests-table tbody td:nth-child(5) {
+    width: 0;
+    display: none;
+  }
+
   #subscription-api {
     top: 80%;
     left: 55%;
@@ -2662,6 +2761,10 @@ footer span {
     margin: 5px auto !important;
     padding: 0;
     width: fit-content;
+  }
+
+  footer {
+    margin-bottom: 60px;
   }
   /*############################################################################*/
 }

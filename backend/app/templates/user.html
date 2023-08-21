@@ -40,11 +40,11 @@
           {% endif %}
           {% if context.current == 2 %}
             <li>
-              <a href="{{ url_for('main.ssearch')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
+              <a href="{{ url_for('main.backtest')}}"  class="current"><i class="fa-solid fa-at"></i> Backtest</a>
             </li>
           {% else %}
             <li>
-              <a href="{{ url_for('main.ssearch')}}"><i class="fa-solid fa-at"></i> Backtest</a>
+              <a href="{{ url_for('main.backtest')}}"><i class="fa-solid fa-at"></i> Backtest</a>
             </li>
           {% endif %}
           {% if context.current == 3 %}
@@ -105,6 +105,7 @@
         <div class="vlist">
           <button id="overview" class="vitem current"><span class="term">Overview</span> <i class="fa-solid fa-chart-line fa-lg abbr"></i></button>
           <button id="subscription" class="vitem"><span class="term">Subscription</span> <i class="fa-solid fa-dollar-sign fa-lg abbr"></i></button>
+          <button id="backtest" class="vitem"><span class="term">Backtest</span> <i class="fa-solid fa-flask fa-lg abbr"></i></button>
           <button id="settings" class="vitem"><span class="term">Settings</span> <i class="fa-solid fa-gear fa-lg abbr"></i></button>
           <button id="api" class="vitem">API</button>
           <button id="logout" class="vitem">Log out</button>
@@ -292,7 +293,7 @@
           <div id="user-info" class="vlist">
             <h2 class="vitem">{{ current_user.name }}</h2>
             <div class="vitem hlist">
-              <h3 class="secondary-info hitem">Subscriptions</h3>
+              <h3 class="secondary-info hitem"><span class="term">Subscriptions</span> <span class="abbr">Subs</span></h3>
               <h3 class="secondary-info hitem">Active</h3>
               <h3 class="secondary-info hitem">Referral code</h3>
             </div>
@@ -452,6 +453,84 @@
             </tbody>
           </table>
           <button id="subscription-confirm" class="iberu-button medium submit">Submit</button>
+        </div>
+      </div>
+
+      <div id="user-backtest-container" class="hide">
+        <div id="user-header-container" class="row panel">
+          <img id="user-image" class="big" src="{{ url_for('main.avatar', user=current_user.id) }}">
+          <div id="user-info" class="vlist">
+            <h2 class="vitem">{{ current_user.name }}</h2>
+            <div class="vitem hlist">
+              <h3 class="secondary-info hitem">Backtest</h3>
+              <h3 class="secondary-info hitem">Available</h3>
+              <h3 class="secondary-info hitem">Referral code</h3>
+            </div>
+            <div class="vitem hlist">
+              <h3 class="secondary-info hitem">{{ context.backtests|length + context.available_backtests }}</h3>
+              <h3 class="secondary-info hitem">{{ context.available_backtests }}</h3>
+              <h3 class="secondary-info hitem">{{ context.referral_code }}</h3>
+            </div>
+          </div>
+          <div id="user-achievements">
+            <div class="thumbnail">
+              <div class="header">
+                <h2>Invite 10 friends to receive 10% discount</h2>
+              </div>
+              <div class="body">
+                {% if context.invites > 10 %}
+                  <progress max="10" value="10"></progress>
+                {% else %}
+                  <progress max="10" value="{{ context.invites }}"></progress>
+                {% endif %}
+                <p class="secondary-info">{{ context.invites }} out of 10 friends invited</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="external-container large">
+          <h1>User backtests</h1>
+          <table class="backtests-table" aria-label="Top performing strategies in the last 30 days">
+            <caption class="visually-hidden">This table contains the user's last 20 subscription</caption>
+            <thead>
+              <tr>
+                <th scope="col">Backtest</th>
+                <th scope="col">Status</th>
+                <th scope="col">Winrate</th>
+                <th scope="col">RoR</th>
+                <th scope="col">Strategy</th>
+                <th scope="col">PDF</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in context.backtests %}
+                <tr class="subscription">
+                  <td>{{ b.backtest }}</td>
+                  {% if b.status == 0 %}
+                    <td class="alert"><i class="fa-solid fa-circle alert"></i> <span class="term">Accepted</span></td>
+                  {% elif b.status == 1 %}
+                    <td class="positive"><i class="fa-solid fa-circle positive"></i> <span class="term">Completed</span></td>
+                  {% else %}
+                    <td class="negative"> <i class="fa-solid fa-circle negative"></i> <span class="term">Rejected</span></td>
+                  {% endif %}
+                  <td>{{ b.winrate }}</td>
+                  <td>{{ b.ror }}</td>
+                  <td>
+                    {% if b.accepted == True %}
+                      <i class="fa-solid fa-circle positive"></i> <span class="term positive">Upgradable</span>
+                    {% else %}
+                      <i class="fa-solid fa-circle negative"></i> <span class="term negative">Rejected</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a class="big backtest-pdf" download="{{ b.backtest }}.pdf" data-value="{{ b.backtest }}">
+                      <img src="/static/img/pdf.png" class="icon" alt="">
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
 
